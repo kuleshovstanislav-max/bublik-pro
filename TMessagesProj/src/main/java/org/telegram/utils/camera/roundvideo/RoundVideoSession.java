@@ -37,10 +37,11 @@ public final class RoundVideoSession {
         P480(480),
         /** 360 x 360 output. */
         P360(360),
-        /** 640 x 640 output (HQ). */
-        P640(640),
-        /** 720 x 720 output (HQ). */
-        P720(720);
+        /**
+         * 640 x 640 output (HQ). This is the largest size Telegram accepts as a video message:
+         * larger squares lose round_message on the server and arrive as regular videos.
+         */
+        P640(640);
 
         private final int size;
 

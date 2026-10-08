@@ -304,7 +304,7 @@ final class RoundVideoCodecRecorder implements RoundVideoGlProcessor.FrameTiming
             }
         }
         if (highLevel != 0) {
-            // 4.1 covers 720x720@60 at these bitrates; a higher signalled level (Pixel advertises 6)
+            // 4.1 covers 640x640@60 at these bitrates; a higher signalled level (Pixel advertises 6)
             // can make recipients' decoders reject the stream.
             format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh);
             format.setInteger(MediaFormat.KEY_LEVEL, Math.min(highLevel, MediaCodecInfo.CodecProfileLevel.AVCLevel41));

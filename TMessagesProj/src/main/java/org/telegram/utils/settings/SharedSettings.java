@@ -12,7 +12,7 @@ public final class SharedSettings {
         BooleanSetting.of("round_video_camera2_enabled", true);
 
     public static final EnumSetting<RoundVideoSession.OutputResolution> roundVideoOutputResolution =
-        EnumSetting.of("round_video_output_resolution", RoundVideoSession.OutputResolution.P720);
+        EnumSetting.of("round_video_output_resolution", RoundVideoSession.OutputResolution.P640);
 
     public static final EnumSetting<RoundVideoSession.CameraResolution> roundVideoCameraResolution =
         EnumSetting.of("round_video_camera_resolution", RoundVideoSession.CameraResolution.HIGH);

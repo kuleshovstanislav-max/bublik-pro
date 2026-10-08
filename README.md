@@ -4,7 +4,7 @@
 
 Bublik Pro is an *unofficial* Telegram client: a small fork of
 [Telegram for Android](https://github.com/DrKLO/Telegram) (GPL v2) that records round video
-messages ("circles") at up to **720×720, H.264 High, 6 Mbps**. The stock app records 384–480p
+messages ("circles") at up to **640×640, H.264 High, 6 Mbps**. The stock app records 384–480p
 at about 1 Mbps.
 
 > Not affiliated with Telegram FZ-LLC or Google. "Telegram" and "Pixel" are trademarks of their owners.
@@ -13,11 +13,11 @@ at about 1 Mbps.
 
 | | Telegram (Camera2 recorder) | Bublik Pro |
 |---|---|---|
-| Output resolution | 360p / 480p | 360p / 480p / **640p / 720p** |
+| Output resolution | 360p / 480p | 360p / 480p / **640p** (Telegram's maximum for circles) |
 | Video bitrate | 0.75 – 1.2 Mbps | 0.75 – **6 Mbps** (default 4) |
 | H.264 profile | encoder default | **High** when the encoder supports it, automatic fallback otherwise |
 | Rate control | encoder default | VBR when supported, bitrate clamped to the encoder's range |
-| Camera source for 640/720p | — | 1080p crop, downscaled |
+| Camera source for 640p | — | 1080p crop, downscaled |
 
 Settings → **Experimental → Round Video** lets you choose resolution, camera source, 30/60 fps and bitrate.
 
@@ -25,24 +25,29 @@ Recipients get the file **byte-for-byte as recorded**: the client does not re-en
 and we verified that the copy downloaded from Telegram's servers by the official app has the same SHA-256.
 
 Measured on a Pixel 11 Pro XL (Android 17), with hardware encoder `c2.google.avc.encoder`:
-720×720, High profile, level 3.1, 30 fps, about 6.1–6.3 Mbps at the 6 Mbps setting, a keyframe every second.
+640×640, High profile, level 3.1, 30 fps, about 6.2 Mbps at the 6 Mbps setting, a keyframe every second.
+
+> **Why not 720p?** Telegram accepts video messages up to 640×640. Bigger squares lose the
+> "round" flag on the server and arrive as ordinary videos (TDLib documents this limit too:
+> `length … not greater than 640`). Release 12.10.6-1 offered 720p by mistake. Update to 12.10.6-2 or newer.
 
 ### Side by side on the same Pixel 11 Pro XL
 
 Measured on circles recorded in the same chat, read from the copies downloaded from Telegram's servers:
 
-| | Telegram (official) | Bublik Pro, 4 Mbps | Bublik Pro, 6 Mbps |
-|---|---|---|---|
-| Resolution | 480×480 | **720×720** | **720×720** |
-| Pixels per frame | 230 k | 518 k (×2.25) | 518 k (×2.25) |
-| Codec | H.264 High, level 3.0 | H.264 High, level 3.1 | H.264 High, level 3.1 |
-| Frame rate, keyframes | 30 fps, every 1 s | 30 fps, every 1 s | 30 fps, every 1 s |
-| Bitrate (incl. audio) | 1.32 Mbps | 4.21 Mbps (×3.2) | 6.23 Mbps (×4.7) |
-| Bits per pixel per frame | 0.19 | 0.27 | 0.40 |
-| Size of 10 s | ~1.7 MB | ~5.3 MB | ~7.8 MB |
+| | Telegram (official) | Bublik Pro, 6 Mbps |
+|---|---|---|
+| Resolution | 480×480 | **640×640** |
+| Pixels per frame | 230 k | 410 k (×1.78) |
+| Codec | H.264 High, level 3.0 | H.264 High, level 3.1 |
+| Frame rate, keyframes | 30 fps, every 1 s | 30 fps, every 1 s |
+| Bitrate (incl. audio) | 1.32 Mbps | 6.2 Mbps (×4.7) |
+| Bits per pixel per frame | 0.19 | 0.50 |
+| Size of 10 s | ~1.7 MB | ~7.8 MB |
 
-The Pixel encoder already picks High profile for the official app. The gain comes from 2.25× more pixels
-and 1.4–2× more bits per pixel, which means more detail and fewer compression artifacts.
+The Pixel encoder already picks High profile for the official app. The gain comes from 1.78× more pixels
+and about 2.6× more bits per pixel, which means more detail and fewer compression artifacts.
+The 4 Mbps setting gives about 0.33 bits per pixel (not yet re-measured at 640p).
 
 ## Limitations, please read
 
@@ -84,7 +89,7 @@ Verify the signing certificate fingerprint published in the release notes.
 
 ## Changed files
 
-- `utils/camera/roundvideo/RoundVideoSession.java`: 640p / 720p output sizes
+- `utils/camera/roundvideo/RoundVideoSession.java`: 640p output size
 - `utils/camera/roundvideo/RoundVideoCameraController.java`: source crop for HQ sizes
 - `utils/camera/roundvideo/RoundVideoCodecRecorder.java`: High profile and level, VBR, bitrate clamping, fallback
 - `ui/RoundVideoSettingsActivity.java`: new choices (and a fix for a `null` bitrate label in release builds)
@@ -93,7 +98,7 @@ Verify the signing certificate fingerprint published in the release notes.
 
 ## Українською
 
-**Bublik Pro** — неофіційний клієнт Telegram, який записує відеокружки у якості до 720×720,
+**Bublik Pro** — неофіційний клієнт Telegram, який записує відеокружки у якості до 640×640 (максимум, який Telegram приймає для кружків),
 H.264 High, 6 Мбіт/с. Налаштований під Pixel 11 Pro та Pro XL. Ставиться поруч з офіційним Telegram.
 Push-сповіщення не працюють: це обмеження всіх неофіційних збірок без власного Firebase.
 

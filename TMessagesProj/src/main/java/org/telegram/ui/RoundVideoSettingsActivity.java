@@ -55,7 +55,6 @@ public class RoundVideoSettingsActivity extends BaseFragment {
     };
 
     private static final RoundVideoSession.OutputResolution[] OUTPUT_RESOLUTIONS = {
-            RoundVideoSession.OutputResolution.P720,
             RoundVideoSession.OutputResolution.P640,
             RoundVideoSession.OutputResolution.P480,
             RoundVideoSession.OutputResolution.P360
