@@ -1702,6 +1702,11 @@ final class RoundVideoCameraController {
         if (cameraResolution == RoundVideoSession.CameraResolution.LOW) {
             return outputResolution.getSize();
         }
+        if (outputResolution.isHighQuality()) {
+            // 2x oversampling would exceed the 1088 short-side bandwidth cap, so HQ
+            // outputs use a 1080 crop (HIGH) or a 960 crop (MEDIUM).
+            return cameraResolution == RoundVideoSession.CameraResolution.HIGH ? 1080 : 960;
+        }
         if (outputResolution == RoundVideoSession.OutputResolution.P480) {
             return cameraResolution == RoundVideoSession.CameraResolution.HIGH ? 960 : 720;
         }

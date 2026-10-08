@@ -6,13 +6,13 @@ import org.telegram.utils.camera.roundvideo.RoundVideoSession;
 public final class SharedSettings {
 
     public static final BooleanSetting experimentalSettingsAllowed =
-        BooleanSetting.of("experimental_settings_allowed", BuildConfig.DEBUG_VERSION);
+        BooleanSetting.of("experimental_settings_allowed", true);
 
     public static final BooleanSetting roundVideoCamera2Enabled =
-        BooleanSetting.of("round_video_camera2_enabled", BuildConfig.DEBUG_VERSION);
+        BooleanSetting.of("round_video_camera2_enabled", true);
 
     public static final EnumSetting<RoundVideoSession.OutputResolution> roundVideoOutputResolution =
-        EnumSetting.of("round_video_output_resolution", RoundVideoSession.OutputResolution.P480);
+        EnumSetting.of("round_video_output_resolution", RoundVideoSession.OutputResolution.P720);
 
     public static final EnumSetting<RoundVideoSession.CameraResolution> roundVideoCameraResolution =
         EnumSetting.of("round_video_camera_resolution", RoundVideoSession.CameraResolution.HIGH);
@@ -21,7 +21,7 @@ public final class SharedSettings {
         EnumSetting.of("round_video_frame_rate", RoundVideoSession.FrameRate.FPS_30);
 
     public static final IntSetting roundVideoVideoBitrate =
-        IntSetting.of("round_video_video_bitrate", 1_000_000);
+        IntSetting.of("round_video_video_bitrate", 4_000_000);
 
     public static final BooleanSetting roundVideoComposition =
         BooleanSetting.of("round_video_composition", true);

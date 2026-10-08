@@ -36,7 +36,11 @@ public final class RoundVideoSession {
         /** 480 x 480 output. */
         P480(480),
         /** 360 x 360 output. */
-        P360(360);
+        P360(360),
+        /** 640 x 640 output (HQ). */
+        P640(640),
+        /** 720 x 720 output (HQ). */
+        P720(720);
 
         private final int size;
 
@@ -47,6 +51,11 @@ public final class RoundVideoSession {
         /** Returns the encoded width and height in pixels. */
         public int getSize() {
             return size;
+        }
+
+        /** Returns whether this is one of the HQ resolutions added by the fork. */
+        public boolean isHighQuality() {
+            return size >= 640;
         }
     }
 

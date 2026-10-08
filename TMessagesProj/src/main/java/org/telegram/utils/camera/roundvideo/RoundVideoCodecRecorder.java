@@ -246,13 +246,21 @@ final class RoundVideoCodecRecorder implements RoundVideoGlProcessor.FrameTiming
                 outputSize
         );
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-        format.setInteger(MediaFormat.KEY_BIT_RATE, videoBitrate);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, videoFrameRate);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
         videoCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
-        MediaCodecInfo.VideoCapabilities capabilities = videoCodec.getCodecInfo()
-                .getCapabilitiesForType(MediaFormat.MIMETYPE_VIDEO_AVC)
-                .getVideoCapabilities();
+        MediaCodecInfo.CodecCapabilities codecCapabilities = videoCodec.getCodecInfo()
+                .getCapabilitiesForType(MediaFormat.MIMETYPE_VIDEO_AVC);
+        MediaCodecInfo.VideoCapabilities capabilities = codecCapabilities.getVideoCapabilities();
+        int bitrate = capabilities.getBitrateRange().clamp(videoBitrate);
+        format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
+        if (outputSize >= 640) {
+            applyHighQualityEncoderSettings(format, codecCapabilities);
+        }
+        boolean hardware = Build.VERSION.SDK_INT >= 29 && videoCodec.getCodecInfo().isHardwareAccelerated();
+        diagnostics.log("video encoder caps: hardware=" + hardware
+                + ", bitrateRange=" + capabilities.getBitrateRange()
+                + ", requestedBitrate=" + videoBitrate + ", appliedBitrate=" + bitrate);
         if (!capabilities.isSizeSupported(outputSize, outputSize)
                 || !capabilities.areSizeAndRateSupported(
                 outputSize,
@@ -264,8 +272,48 @@ final class RoundVideoCodecRecorder implements RoundVideoGlProcessor.FrameTiming
         }
         diagnostics.log("video encoder configure: codec=" + videoCodec.getName()
                 + ", format=" + format);
-        videoCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        try {
+            videoCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        } catch (MediaCodec.CodecException | IllegalArgumentException e) {
+            if (!format.containsKey(MediaFormat.KEY_PROFILE)) throw e;
+            diagnostics.log("video encoder rejected High profile, retrying with defaults: " + e);
+            MediaFormat fallback = MediaFormat.createVideoFormat(
+                    MediaFormat.MIMETYPE_VIDEO_AVC,
+                    outputSize,
+                    outputSize
+            );
+            fallback.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+            fallback.setInteger(MediaFormat.KEY_FRAME_RATE, videoFrameRate);
+            fallback.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
+            fallback.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
+            videoCodec.reset();
+            videoCodec.configure(fallback, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        }
         videoInputSurface = videoCodec.createInputSurface();
+    }
+
+    /** Requests AVC High profile at the best level the encoder advertises, and VBR when supported. */
+    private static void applyHighQualityEncoderSettings(
+            @NonNull MediaFormat format,
+            @NonNull MediaCodecInfo.CodecCapabilities codecCapabilities
+    ) {
+        int highLevel = 0;
+        for (MediaCodecInfo.CodecProfileLevel profileLevel : codecCapabilities.profileLevels) {
+            if (profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AVCProfileHigh) {
+                highLevel = Math.max(highLevel, profileLevel.level);
+            }
+        }
+        if (highLevel != 0) {
+            // 4.1 covers 720x720@60 at these bitrates; a higher signalled level (Pixel advertises 6)
+            // can make recipients' decoders reject the stream.
+            format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh);
+            format.setInteger(MediaFormat.KEY_LEVEL, Math.min(highLevel, MediaCodecInfo.CodecProfileLevel.AVCLevel41));
+        }
+        MediaCodecInfo.EncoderCapabilities encoderCapabilities = codecCapabilities.getEncoderCapabilities();
+        if (encoderCapabilities != null && encoderCapabilities.isBitrateModeSupported(
+                MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR)) {
+            format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
+        }
     }
 
     private void createAudioEncoder() throws IOException {

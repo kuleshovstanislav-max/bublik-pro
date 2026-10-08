@@ -48,7 +48,17 @@ public class RoundVideoSettingsActivity extends BaseFragment {
             750_000,
             1_000_000,
             1_200_000,
-            2_000_000
+            2_000_000,
+            3_000_000,
+            4_000_000,
+            6_000_000
+    };
+
+    private static final RoundVideoSession.OutputResolution[] OUTPUT_RESOLUTIONS = {
+            RoundVideoSession.OutputResolution.P720,
+            RoundVideoSession.OutputResolution.P640,
+            RoundVideoSession.OutputResolution.P480,
+            RoundVideoSession.OutputResolution.P360
     };
 
     private RecyclerListView listView;
@@ -98,10 +108,8 @@ public class RoundVideoSettingsActivity extends BaseFragment {
         if (position == ROW_OUTPUT_RESOLUTION) {
             showChoice(
                     R.string.RoundVideoOutputResolution,
-                    new CharSequence[]{"480p", "360p"},
-                    index -> SharedSettings.roundVideoOutputResolution.set(index == 0
-                            ? RoundVideoSession.OutputResolution.P480
-                            : RoundVideoSession.OutputResolution.P360)
+                    outputResolutionLabels(),
+                    index -> SharedSettings.roundVideoOutputResolution.set(OUTPUT_RESOLUTIONS[index])
             );
         } else if (position == ROW_CAMERA_RESOLUTION) {
             showChoice(
@@ -125,7 +133,7 @@ public class RoundVideoSettingsActivity extends BaseFragment {
             );
         } else if (position == ROW_BITRATE) {
             CharSequence[] labels = new CharSequence[BITRATES.length];
-            for (int i = 0; i < (BITRATES.length - (BuildConfig.DEBUG_PRIVATE_VERSION ? 0 : 1)); i++) {
+            for (int i = 0; i < BITRATES.length; i++) {
                 labels[i] = formatBitrate(BITRATES[i]);
             }
             showChoice(
@@ -147,6 +155,15 @@ public class RoundVideoSettingsActivity extends BaseFragment {
             adapter.notifyDataSetChanged();
         });
         showDialog(builder.create());
+    }
+
+    private static CharSequence[] outputResolutionLabels() {
+        CharSequence[] labels = new CharSequence[OUTPUT_RESOLUTIONS.length];
+        for (int i = 0; i < OUTPUT_RESOLUTIONS.length; i++) {
+            RoundVideoSession.OutputResolution resolution = OUTPUT_RESOLUTIONS[i];
+            labels[i] = resolution.getSize() + "p" + (resolution.isHighQuality() ? " (HQ)" : "");
+        }
+        return labels;
     }
 
     private static String formatBitrate(int bitrate) {
