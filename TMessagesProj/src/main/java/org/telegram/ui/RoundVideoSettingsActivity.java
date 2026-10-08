@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.utils.settings.SharedSettings;
@@ -42,7 +41,7 @@ public class RoundVideoSettingsActivity extends BaseFragment {
     private static final int ROW_COMPOSITION_HEADER = 7;
     private static final int ROW_COMPOSITION = 8;
     private static final int ROW_COMPOSITION_INFO = 9;
-    private static final int ROW_COUNT = BuildConfig.DEBUG_PRIVATE_VERSION ? 10 : 7;
+    private static final int ROW_COUNT = 10; // Bublik Pro: styling toggle visible in every build
 
     private static final int[] BITRATES = {
             750_000,
