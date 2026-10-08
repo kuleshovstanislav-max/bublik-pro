@@ -27,6 +27,23 @@ and we verified that the copy downloaded from Telegram's servers by the official
 Measured on a Pixel 11 Pro XL (Android 17), with hardware encoder `c2.google.avc.encoder`:
 720×720, High profile, level 3.1, 30 fps, about 6.1–6.3 Mbps at the 6 Mbps setting, a keyframe every second.
 
+### Side by side on the same Pixel 11 Pro XL
+
+Measured on circles recorded in the same chat, read from the copies downloaded from Telegram's servers:
+
+| | Telegram (official) | Bublik Pro, 4 Mbps | Bublik Pro, 6 Mbps |
+|---|---|---|---|
+| Resolution | 480×480 | **720×720** | **720×720** |
+| Pixels per frame | 230 k | 518 k (×2.25) | 518 k (×2.25) |
+| Codec | H.264 High, level 3.0 | H.264 High, level 3.1 | H.264 High, level 3.1 |
+| Frame rate, keyframes | 30 fps, every 1 s | 30 fps, every 1 s | 30 fps, every 1 s |
+| Bitrate (incl. audio) | 1.32 Mbps | 4.21 Mbps (×3.2) | 6.23 Mbps (×4.7) |
+| Bits per pixel per frame | 0.19 | 0.27 | 0.40 |
+| Size of 10 s | ~1.7 MB | ~5.3 MB | ~7.8 MB |
+
+The Pixel encoder already picks High profile for the official app. The gain comes from 2.25× more pixels
+and 1.4–2× more bits per pixel, which means more detail and fewer compression artifacts.
+
 ## Limitations, please read
 
 - **Push notifications don't work.** Telegram's FCM project only serves official builds.
