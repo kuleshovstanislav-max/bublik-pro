@@ -7,9 +7,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import org.telegram.messenger.AppGlobalConfig;
 import org.telegram.messenger.ImageReceiver;
-import org.telegram.messenger.UserConfig;
 import org.telegram.utils.settings.SharedSettings;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory;
@@ -50,9 +48,9 @@ public abstract class InstantCameraViewBase extends FrameLayout {
             Theme.ResourcesProvider resourcesProvider,
             boolean isNewDesign
     ) {
-        final boolean useCamera2Impl = SharedSettings.roundVideoCamera2Enabled.isSet() ?
-            SharedSettings.roundVideoCamera2Enabled.get() :
-            AppGlobalConfig.getInstance(UserConfig.selectedAccount).roundVideoRecorder2Allowed.get();
+        // Bublik Pro: the HQ settings only apply to the Camera2 recorder, so use it unless the user
+        // switched it off; the server flag (round_video_recorder_2_allowed) is ignored.
+        final boolean useCamera2Impl = SharedSettings.roundVideoCamera2Enabled.get();
 
         return useCamera2Impl
                 ? new InstantCameraView2(context, delegate, resourcesProvider, isNewDesign)
