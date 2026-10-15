@@ -4,4 +4,5 @@
     <string name="BublikPinnedChats">Pinned</string>
     <string name="BublikAllChats">All chats</string>
     <string name="BublikStories">Stories</string>
+    <string name="BublikGooglePhotos">Google Photos</string>
 </resources>

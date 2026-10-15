@@ -25,6 +25,23 @@ ICONS = {
     "saved": "bookmark-simple",
     "archive": "archive",
     "replies": "arrow-bend-up-left",
+    "mic": "microphone",
+    "video": "video-camera",
+    "sticker": "sticker",
+    "keyboard": "keyboard",
+    "smile": "smiley",
+    "gif": "gif",
+    "gallery": "image",
+    "file": "file",
+    "location": "map-pin",
+    "music": "music-note",
+    "poll": "chart-bar",
+    "checklist": "list-checks",
+    "article": "article",
+    "link": "link",
+    "wallet": "wallet",
+    "quick": "lightning",
+    "cloud": "cloud",
 }
 
 # Telegram drawables replaced app-wide through res/drawable-anydpi (anydpi wins over density buckets):
@@ -53,6 +70,10 @@ OVERRIDES = {
     "msg_report": ("flag", "duotone", 24, 24),
     "msg_translate": ("translate", "duotone", 24, 24),
     "msg_retry": ("arrow-clockwise", "duotone", 24, 24),
+    "chat_calls_voice": ("phone", "duotone", 28, 24),
+    "chat_calls_video": ("video-camera", "duotone", 28, 24),
+    "chat_calls_outgoing": ("arrow-up-right", "bold", 14, 14),
+    "chat_calls_incoming": ("arrow-down-left", "bold", 14, 14),
 }
 
 HEADER = """<?xml version="1.0" encoding="utf-8"?>

@@ -138,7 +138,8 @@ android {
         minSdkVersion 23
         targetSdkVersion 36
 
-        vectorDrawables.generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
+        // Bublik Pro: keep vectors as vectors (minSdk 23) so res/drawable-anydpi icon overrides win.
+        vectorDrawables.generatedDensities = []
 
         multiDexEnabled true
 

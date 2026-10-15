@@ -20424,6 +20424,11 @@ public class ChatActivity extends BaseFragment implements
                     chatAttachAlert.getPhotoLayout().onActivityResultFragment(requestCode, data, currentPicturePath);
                 }
                 currentPicturePath = null;
+            } else if (requestCode == ChatAttachAlertPhotoLayout.BUBLIK_GOOGLE_PHOTOS) {
+                createChatAttachView();
+                if (chatAttachAlert != null) {
+                    chatAttachAlert.getPhotoLayout().onBublikPickedMedia(data);
+                }
             } else if (requestCode == 21 && chatAttachAlert != null && chatAttachAlert.getCurrentAttachLayout() instanceof ChatAttachAlertRichLayout) {
                 ((ChatAttachAlertRichLayout) chatAttachAlert.getCurrentAttachLayout()).onExternalDocumentPicked(data);
                 return;

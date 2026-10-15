@@ -740,13 +740,6 @@ public class Theme {
 
                         currentColors.put(key_chat_outSentCheckRead, textColor);
                         currentColors.put(key_chat_outSentCheckReadSelected, textColor);
-                        if (parentTheme != null && "Night".equals(parentTheme.name)) {
-                            // Bublik Pro: accent read checks on the graphite outgoing bubbles.
-                            currentColors.put(key_chat_outSentCheck, 0xFF2E9BF0);
-                            currentColors.put(key_chat_outSentCheckSelected, 0xFF2E9BF0);
-                            currentColors.put(key_chat_outSentCheckRead, 0xFF2E9BF0);
-                            currentColors.put(key_chat_outSentCheckReadSelected, 0xFF2E9BF0);
-                        }
 
                         currentColors.put(key_chat_outSentClock, textColor);
                         currentColors.put(key_chat_outSentClockSelected, textColor);
@@ -905,6 +898,13 @@ public class Theme {
             applyCalculatedTableColors(currentColorsNoAccent, currentColors, isDarkTheme);
             applyCalculatedArticleCodeColors(currentColorsNoAccent, currentColors, isDarkTheme);
 
+            if (parentTheme != null && "Night".equals(parentTheme.name)) {
+                // Bublik Pro: accent read checks on the graphite outgoing bubbles (set last, after the accent shift).
+                currentColors.put(key_chat_outSentCheck, 0xFF2E9BF0);
+                currentColors.put(key_chat_outSentCheckSelected, 0xFF2E9BF0);
+                currentColors.put(key_chat_outSentCheckRead, 0xFF2E9BF0);
+                currentColors.put(key_chat_outSentCheckReadSelected, 0xFF2E9BF0);
+            }
             return !isMyMessagesGradientColorsNear;
         }
 

@@ -93,6 +93,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
@@ -2779,6 +2780,10 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             if (view instanceof AttachButton) {
                 final Activity activity = lastFragment.getParentActivity();
                 int num = view.getTag() instanceof Integer ? (Integer) view.getTag() : -1;
+                if (num == ChatAttachAlertPhotoLayout.BUBLIK_GOOGLE_PHOTOS) {
+                    photoLayout.launchBublikPhotoPicker(baseFragment);
+                    return;
+                }
                 if (num == 1) {
                     if (!photosEnabled && !videosEnabled && checkCanRemoveRestrictionsByBoosts()) {
                         return;
@@ -6601,6 +6606,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         private int linksButton;
         private int richButton;
         private int buttonsCount;
+        private int googlePhotosButton;
 
         public ButtonsAdapter(Context context) {
             mContext = context;
@@ -6637,6 +6643,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                         attachButton.setTextAndIcon(1, getString(R.string.ChatGallery), GlassTabView.TabAnimation.GALLERY);
                         attachButton.setTag(1);
                         err = !checkPhotoAndCameraPermission(mContext);
+                    } else if (position == googlePhotosButton) {
+                        attachButton.setTextAndIcon(ChatAttachAlertPhotoLayout.BUBLIK_GOOGLE_PHOTOS, ApplicationLoader.applicationContext.getString(R.string.BublikGooglePhotos), GlassTabView.TabAnimation.GOOGLE_PHOTOS);
+                        attachButton.setTag(ChatAttachAlertPhotoLayout.BUBLIK_GOOGLE_PHOTOS);
                     } else if (position == moneyButton) {
                         attachButton.setTextAndIcon(LAYOUT_TYPE_MONEY, getString(R.string.WalletAttachMoney), GlassTabView.TabAnimation.GRAM);
                         attachButton.setTag(LAYOUT_TYPE_MONEY);
@@ -6724,6 +6733,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         public void notifyDataSetChanged() {
             buttonsCount = 0;
             galleryButton = -1;
+            googlePhotosButton = -1;
             documentButton = -1;
             moneyButton = -1;
             musicButton = -1;
@@ -6787,6 +6797,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 TLRPC.Chat chat = baseFragment instanceof ChatActivity ? ((ChatActivity) baseFragment).getCurrentChat() : null;
                 final boolean paidUser = user != null && ((ChatActivity) baseFragment).getMessagesController().getSendPaidMessagesStars(user.id) > 0;
                 galleryButton = buttonsCount++;
+                if (photosEnabled || videosEnabled) {
+                    googlePhotosButton = buttonsCount++;
+                }
                 documentButton = buttonsCount++;
                 if (MessagesController.getInstance(currentAccount).config.walletAvailable.get() && ((ChatActivity) baseFragment).getChatMode() == ChatActivity.MODE_DEFAULT && isMoneyTabRecipient(user)) {
                     moneyButton = buttonsCount++;

@@ -2729,6 +2729,134 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         }
     }
 
+    // Bublik Pro: "Google Photos" attach tile. The system photo picker also lists Google Photos
+    // cloud media, which Telegram's own MediaStore gallery can't see.
+    public static final int BUBLIK_GOOGLE_PHOTOS = 1777;
+
+    public void launchBublikPhotoPicker(BaseFragment fragment) {
+        if (fragment == null) {
+            return;
+        }
+        final boolean multiple = parentAlert.maxSelectedPhotos != 1;
+        Intent intent;
+        if (Build.VERSION.SDK_INT >= 33) {
+            intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
+            if (multiple) {
+                int max = MediaStore.getPickImagesMaxLimit();
+                if (parentAlert.maxSelectedPhotos > 1) {
+                    max = Math.min(max, parentAlert.maxSelectedPhotos);
+                }
+                intent.putExtra(MediaStore.EXTRA_PICK_IMAGES_MAX, max);
+            }
+        } else {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "video/*"});
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, multiple);
+        }
+        try {
+            fragment.startActivityForResult(intent, BUBLIK_GOOGLE_PHOTOS);
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
+
+    public void onBublikPickedMedia(Intent data) {
+        if (parentAlert.destroyed || data == null) {
+            return;
+        }
+        final ArrayList<Uri> uris = new ArrayList<>();
+        if (data.getClipData() != null) {
+            for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                Uri uri = data.getClipData().getItemAt(i).getUri();
+                if (uri != null) {
+                    uris.add(uri);
+                }
+            }
+        } else if (data.getData() != null) {
+            uris.add(data.getData());
+        }
+        if (uris.isEmpty()) {
+            return;
+        }
+        final android.content.ContentResolver resolver = ApplicationLoader.applicationContext.getContentResolver();
+        Utilities.globalQueue.postRunnable(() -> {
+            final ArrayList<MediaController.PhotoEntry> entries = new ArrayList<>();
+            for (Uri uri : uris) {
+                try {
+                    final String mime = resolver.getType(uri);
+                    final boolean video = mime != null && mime.startsWith("video/");
+                    String ext = mime != null ? android.webkit.MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) : null;
+                    if (ext == null) {
+                        ext = video ? "mp4" : "jpg";
+                    }
+                    final String path = MediaController.copyFileToCache(uri, ext);
+                    if (path == null) {
+                        continue;
+                    }
+                    int width = 0, height = 0;
+                    MediaController.PhotoEntry entry;
+                    if (video) {
+                        long duration = 0;
+                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                        try {
+                            retriever.setDataSource(path);
+                            String d = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                            String w = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+                            String h = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+                            if (d != null) duration = Long.parseLong(d);
+                            if (w != null) width = Integer.parseInt(w);
+                            if (h != null) height = Integer.parseInt(h);
+                        } finally {
+                            retriever.release();
+                        }
+                        entry = new MediaController.PhotoEntry(0, 0, 0, path, 0, true, width, height, 0);
+                        entry.duration = (int) Math.ceil(duration / 1000.0f);
+                        final Bitmap thumb = SendMessagesHelper.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MINI_KIND);
+                        if (thumb != null) {
+                            final File thumbFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), "bublik_gp_" + Utilities.random.nextLong() + ".jpg");
+                            try (FileOutputStream stream = new FileOutputStream(thumbFile)) {
+                                thumb.compress(Bitmap.CompressFormat.JPEG, 70, stream);
+                                entry.thumbPath = thumbFile.getAbsolutePath();
+                            } catch (Exception e) {
+                                FileLog.e(e);
+                            }
+                        }
+                    } else {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(path, options);
+                        width = options.outWidth;
+                        height = options.outHeight;
+                        Pair<Integer, Integer> orientation = AndroidUtilities.getImageOrientation(path);
+                        entry = new MediaController.PhotoEntry(0, 0, 0, path, orientation.first, false, width, height, 0).setOrientation(orientation);
+                    }
+                    entry.canDeleteAfter = true;
+                    entries.add(entry);
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+            }
+            AndroidUtilities.runOnUIThread(() -> {
+                if (parentAlert.destroyed || entries.isEmpty()) {
+                    return;
+                }
+                mediaFromExternalCamera = true;
+                for (int i = 0; i < entries.size(); i++) {
+                    MediaController.PhotoEntry entry = entries.get(i);
+                    entry.imageId = lastImageId--;
+                    if (i < entries.size() - 1) {
+                        cameraPhotos.add(entry);
+                        selectedPhotos.put(entry.imageId, entry);
+                        selectedPhotosOrder.add(entry.imageId);
+                    } else {
+                        openPhotoViewer(entry, false, true);
+                    }
+                }
+            });
+        });
+    }
+
     public void onActivityResultFragment(int requestCode, Intent data, String currentPicturePath) {
         if (parentAlert.destroyed) {
             return;

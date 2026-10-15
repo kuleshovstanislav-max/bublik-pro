@@ -464,6 +464,45 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         } else if (tabAnimation == TabAnimation.SETTINGS) {
             bublikIconIdle = R.drawable.bublik_ph_settings_duotone;
             bublikIconSelected = R.drawable.bublik_ph_settings_fill;
+        } else if (tabAnimation == TabAnimation.GALLERY) {
+            bublikIconIdle = R.drawable.bublik_ph_gallery_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_gallery_fill;
+        } else if (tabAnimation == TabAnimation.GOOGLE_PHOTOS) {
+            bublikIconIdle = R.drawable.bublik_ph_cloud_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_cloud_fill;
+        } else if (tabAnimation == TabAnimation.FILES) {
+            bublikIconIdle = R.drawable.bublik_ph_file_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_file_fill;
+        } else if (tabAnimation == TabAnimation.LOCATION) {
+            bublikIconIdle = R.drawable.bublik_ph_location_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_location_fill;
+        } else if (tabAnimation == TabAnimation.MUSIC) {
+            bublikIconIdle = R.drawable.bublik_ph_music_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_music_fill;
+        } else if (tabAnimation == TabAnimation.POLL) {
+            bublikIconIdle = R.drawable.bublik_ph_poll_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_poll_fill;
+        } else if (tabAnimation == TabAnimation.CHECKLIST) {
+            bublikIconIdle = R.drawable.bublik_ph_checklist_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_checklist_fill;
+        } else if (tabAnimation == TabAnimation.ARTICLE) {
+            bublikIconIdle = R.drawable.bublik_ph_article_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_article_fill;
+        } else if (tabAnimation == TabAnimation.LINK) {
+            bublikIconIdle = R.drawable.bublik_ph_link_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_link_fill;
+        } else if (tabAnimation == TabAnimation.STICKER) {
+            bublikIconIdle = R.drawable.bublik_ph_sticker_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_sticker_fill;
+        } else if (tabAnimation == TabAnimation.EMOJI) {
+            bublikIconIdle = R.drawable.bublik_ph_smile_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_smile_fill;
+        } else if (tabAnimation == TabAnimation.WALLET || tabAnimation == TabAnimation.GRAM) {
+            bublikIconIdle = R.drawable.bublik_ph_wallet_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_wallet_fill;
+        } else if (tabAnimation == TabAnimation.REPLIES) {
+            bublikIconIdle = R.drawable.bublik_ph_quick_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_quick_fill;
         }
     }
 
@@ -598,6 +637,8 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         REPLIES(R.raw.tab_reply, R.raw.tab_reply_reverse),
         WALLET(R.raw.tab_wallet, R.raw.tab_wallet_reverse),
         LINK(TabAnimationType.STATIC, R.drawable.tabs_link_24),
+        // Bublik Pro: system photo picker with Google Photos cloud media.
+        GOOGLE_PHOTOS(TabAnimationType.STATIC, R.drawable.bublik_ph_cloud_duotone),
         ARTICLE(R.raw.tab_article, R.raw.tab_article_reverse),
         GRAM(R.raw.gram, R.raw.gram_reverse),
 
@@ -650,6 +691,8 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
 
     public void setTabAnimation(TabAnimation animation) {
         tabAnimation = animation;
+        bublikIconIdle = bublikIconSelected = 0;
+        setBublikIcons(animation);
         tabAnimationBot = null;
         lastIconAnimationRaw = 0;
         lastBotIconId = 0;

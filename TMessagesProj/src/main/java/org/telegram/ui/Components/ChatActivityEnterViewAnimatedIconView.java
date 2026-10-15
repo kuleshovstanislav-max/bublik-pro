@@ -47,7 +47,17 @@ public class ChatActivityEnterViewAnimatedIconView extends RLottieImageView {
         }
         State fromState = currentState;
         currentState = state;
-        if (!animate || fromState == null || getState(fromState, currentState) == null) {
+        final int bublikIcon = bublikIcon(state);
+        if (bublikIcon != 0) {
+            // Bublik Pro: static Phosphor icon per state with a spring pop instead of the Lottie morph.
+            setImageResource(bublikIcon);
+            if (animate && fromState != null && fromState != state) {
+                animate().cancel();
+                setScaleX(0.6f);
+                setScaleY(0.6f);
+                animate().scaleX(1f).scaleY(1f).setDuration(380).setInterpolator(new android.view.animation.OvershootInterpolator(3f)).start();
+            }
+        } else if (!animate || fromState == null || getState(fromState, currentState) == null) {
             RLottieDrawable drawable = stateMap.get(getAnyState(currentState));
             drawable.stop();
 
@@ -85,6 +95,18 @@ public class ChatActivityEnterViewAnimatedIconView extends RLottieImageView {
                 setContentDescription(LocaleController.getString(R.string.AccDescrVideoMessage));
                 break;
         }
+    }
+
+    private static int bublikIcon(State state) {
+        switch (state) {
+            case VOICE: return R.drawable.bublik_ph_mic_fill;
+            case VIDEO: return R.drawable.bublik_ph_video_fill;
+            case STICKER: return R.drawable.bublik_ph_sticker_duotone;
+            case KEYBOARD: return R.drawable.bublik_ph_keyboard_duotone;
+            case SMILE: return R.drawable.bublik_ph_smile_duotone;
+            case GIF: return R.drawable.bublik_ph_gif_duotone;
+        }
+        return 0;
     }
 
     public State getCurrentState() {

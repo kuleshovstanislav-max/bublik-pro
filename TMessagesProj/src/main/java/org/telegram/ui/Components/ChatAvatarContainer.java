@@ -263,6 +263,9 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
         }
         avatarImageView.setContentDescription(getString(R.string.AccDescrProfilePicture));
         avatarImageView.setRoundRadius(dp(21));
+        // Bublik Pro: cookie-shaped avatar in the chat header, as in the chat list.
+        avatarImageView.getImageReceiver().bublikCookie = true;
+        avatarDrawable.bublikCookie = true;
         addView(avatarImageView);
         if (avatarClickable) {
             final TLRPC.Chat chat = parentFragment != null ? parentFragment.getCurrentChat() : null;
