@@ -8,6 +8,8 @@
 
 package org.telegram.messenger;
 
+import org.telegram.ui.Components.BublikShapes;
+
 import static org.telegram.messenger.ImageLoader.getHttpUrlExtension;
 
 import android.graphics.Bitmap;
@@ -332,6 +334,8 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     private final RectF roundRect = new RectF();
     private final Matrix shaderMatrix = new Matrix();
     private final Path roundPath = new Path();
+    // Bublik Pro: draw the image as the 9-wave cookie instead of a circle / round rect.
+    public boolean bublikCookie;
     private static final float[] radii = new float[8];
     private float overrideAlpha = 1.0f;
     private int isPressed;
@@ -1410,7 +1414,11 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                                     if (roundRadius[0] == 0) {
                                         canvas.drawRect(roundRect, roundPaint);
                                     } else {
-                                        canvas.drawRoundRect(roundRect, roundRadius[0], roundRadius[0], roundPaint);
+                                        if (bublikCookie) {
+                                            canvas.drawPath(BublikShapes.cookie(roundRect), roundPaint);
+                                        } else {
+                                            canvas.drawRoundRect(roundRect, roundRadius[0], roundRadius[0], roundPaint);
+                                        }
                                     }
                                 }
                             } catch (Exception e) {
@@ -1426,7 +1434,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                             roundPath.addRoundRect(roundRect, radii, Path.Direction.CW);
                             roundPath.close();
                             if (canvas != null) {
-                                canvas.drawPath(roundPath, roundPaint);
+                                canvas.drawPath(bublikCookie ? BublikShapes.cookie(roundRect) : roundPath, roundPaint);
                             }
                         }
                     }
@@ -1526,7 +1534,11 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                                             canvas.drawRect(roundRect, roundPaint);
                                         }
                                     } else {
-                                        canvas.drawRoundRect(roundRect, roundRadius[0], roundRadius[0], roundPaint);
+                                        if (bublikCookie) {
+                                            canvas.drawPath(BublikShapes.cookie(roundRect), roundPaint);
+                                        } else {
+                                            canvas.drawRoundRect(roundRect, roundRadius[0], roundRadius[0], roundPaint);
+                                        }
                                     }
                                 }
                             } catch (Exception e) {
@@ -1544,7 +1556,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                             roundPath.addRoundRect(roundRect, radii, Path.Direction.CW);
                             roundPath.close();
                             if (canvas != null) {
-                                canvas.drawPath(roundPath, roundPaint);
+                                canvas.drawPath(bublikCookie ? BublikShapes.cookie(roundRect) : roundPath, roundPaint);
                             }
                         }
                     }

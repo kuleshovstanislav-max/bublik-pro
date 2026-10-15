@@ -2,4 +2,5 @@
 <resources>
     <string name="BublikPinnedChats">Закріплені</string>
     <string name="BublikAllChats">Усі чати</string>
+    <string name="BublikStories">Сторіс</string>
 </resources>

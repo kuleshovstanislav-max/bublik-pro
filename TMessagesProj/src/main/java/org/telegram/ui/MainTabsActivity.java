@@ -377,15 +377,18 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         fadeView.setBackground(fadeDrawable);
 
         contentView.addView(fadeView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 0, Gravity.BOTTOM));
+        // Bublik Pro: no fade under the tabs; it also dimmed the compose button that sits beside them.
+        fadeView.setVisibility(View.GONE);
 
         tabsViewWrapper = new FrameLayout(context);
         tabsViewWrapper.setOnClickListener(v -> {});
         // Bublik Pro: leave room on the trailing side for the round compose button, as in LADDER.
         final int composeSpace = DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN;
-        tabsViewWrapper.addView(tabsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS, Gravity.BOTTOM | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT),
-                LocaleController.isRTL ? composeSpace : 0, 0, LocaleController.isRTL ? 0 : composeSpace, 0));
+        tabsViewWrapper.addView(tabsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL));
         tabsViewWrapper.setClipToPadding(false);
-        contentView.addView(tabsViewWrapper, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM));
+        // The wrapper swallows touches, so it must stop short of the compose button or the button never gets taps.
+        contentView.addView(tabsViewWrapper, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM,
+                LocaleController.isRTL ? composeSpace : 0, 0, LocaleController.isRTL ? 0 : composeSpace, 0));
 
         updateLayoutWrapper = new UpdateLayoutWrapper(context);
         contentView.addView(updateLayoutWrapper, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM));
@@ -1070,7 +1073,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
         fadeView.setAlpha(alpha);
         fadeView.setTranslationY(isProfile * dp(48));
-        fadeView.setVisibility(alpha > 0 ? View.VISIBLE : View.GONE);
+        fadeView.setVisibility(View.GONE); // Bublik Pro: fade disabled, see createView
     }
 
     private void checkUi_tabsPosition() {

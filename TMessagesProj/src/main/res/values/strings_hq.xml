@@ -3,4 +3,5 @@
     <string name="AppNameHQ" translatable="false">Bublik Pro</string>
     <string name="BublikPinnedChats">Pinned</string>
     <string name="BublikAllChats">All chats</string>
+    <string name="BublikStories">Stories</string>
 </resources>

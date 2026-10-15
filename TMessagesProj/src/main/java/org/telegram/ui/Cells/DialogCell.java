@@ -99,6 +99,7 @@ import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.AvatarDrawable;
+import org.telegram.ui.Components.BublikShapes;
 import org.telegram.ui.Components.BubbleCounterPath;
 import org.telegram.ui.Components.ButtonBounce;
 import org.telegram.ui.Components.CanvasButton;
@@ -411,6 +412,22 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     public boolean isHiddenInCommunity;
     private int lastMessageDate;
     private int unreadCount;
+    private final Paint bublikRingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final RectF bublikRingRect = new RectF();
+
+    // Bublik Pro: a thin accent cookie ring around the avatar while the chat has unread messages
+    // (muted chats too), skipped when the story ring is already there.
+    private void drawBublikUnreadRing(Canvas canvas) {
+        if (!(unreadCount > 0 || markUnread) || isDialogFolder() || MessagesController.getInstance(currentAccount).getStoriesController().hasStories(currentDialogId)) {
+            return;
+        }
+        bublikRingRect.set(avatarImage.getImageX(), avatarImage.getImageY(), avatarImage.getImageX2(), avatarImage.getImageY2());
+        bublikRingRect.inset(-dp(3.5f), -dp(3.5f));
+        bublikRingPaint.setStyle(Paint.Style.STROKE);
+        bublikRingPaint.setStrokeWidth(dp(2));
+        bublikRingPaint.setColor(Theme.getColor(Theme.key_chats_unreadCounter, resourcesProvider));
+        canvas.drawPath(BublikShapes.cookie(bublikRingRect), bublikRingPaint);
+    }
     private boolean markUnread;
     private int mentionCount;
     private int reactionMentionCount;
@@ -698,6 +715,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         drawMonoforumAvatar = false;
         drawCommunityAvatar = false;
         avatarImage.setRoundRadius(dp(26));
+        avatarImage.bublikCookie = true;
+        avatarDrawable.bublikCookie = true;
         for (int i = 0; i < thumbImage.length; ++i) {
             thumbImage[i] = new ImageReceiver(this);
             thumbImage[i].ignoreNotifications = true;
@@ -4768,6 +4787,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                     checkTtl();
                 }
                 storyParams.forceState = s;
+                drawBublikUnreadRing(canvas);
             }
 
             if (!insideCommunityList && (chat != null && chat.linked_community_id != 0 || user != null && user.linked_community_id != 0) && !drawCommunityAvatar && isDialogCell && !isDialogFolder()) {

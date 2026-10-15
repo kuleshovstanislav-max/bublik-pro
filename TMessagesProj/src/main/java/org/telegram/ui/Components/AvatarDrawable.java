@@ -61,6 +61,8 @@ public class AvatarDrawable extends Drawable {
     private float scaleSize = 1f;
     private StringBuilder stringBuilder = new StringBuilder(5);
     private int roundRadius = -1;
+    // Bublik Pro: cookie-shaped placeholder background.
+    public boolean bublikCookie;
 
     private int gradientTop, gradientBottom;
     private int gradientColor1, gradientColor2;
@@ -588,7 +590,10 @@ public class AvatarDrawable extends Drawable {
                 canvas.save();
                 canvas.rotate(-45, size / 2.0f, size / 2.0f);
             }
-            if (roundRadius > 0) {
+            if (bublikCookie) {
+                AndroidUtilities.rectTmp.set(0, 0, size, size);
+                canvas.drawPath(BublikShapes.cookie(AndroidUtilities.rectTmp), backgroundPaint);
+            } else if (roundRadius > 0) {
                 AndroidUtilities.rectTmp.set(0, 0, size, size);
                 canvas.drawRoundRect(AndroidUtilities.rectTmp, roundRadius, roundRadius, backgroundPaint);
             } else {

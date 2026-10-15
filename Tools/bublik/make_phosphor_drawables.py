@@ -21,6 +21,10 @@ ICONS = {
     "search": "magnifying-glass",
     "more": "dots-three-vertical",
     "pin": "push-pin",
+    "stories": "circle-dashed",
+    "saved": "bookmark-simple",
+    "archive": "archive",
+    "replies": "arrow-bend-up-left",
 }
 
 HEADER = """<?xml version="1.0" encoding="utf-8"?>

@@ -356,6 +356,13 @@ public class FilterTabsView extends FrameLayout {
                     textPaint.setColor(ColorUtils.blendARGB(color1, color2, animationValue));
                 }
             }
+            if (bublikPills) {
+                float selected = currentTab.id == id1 ? 1f : 0f;
+                if ((animatingIndicator || manualScrollingToId != -1) && (currentTab.id == id1 || currentTab.id == id2)) {
+                    selected = currentTab.id == id1 ? animatingIndicatorProgress : 1f - animatingIndicatorProgress;
+                }
+                textPaint.setColor(ColorUtils.blendARGB(Theme.getColor(unactiveTextColorKey, resourcesProvider), BUBLIK_PILL_INK, selected));
+            }
             emojiColorFilter = new PorterDuffColorFilter(textPaint.getColor(), PorterDuff.Mode.SRC_IN);
 
             float counterWidth;
@@ -459,6 +466,14 @@ public class FilterTabsView extends FrameLayout {
                     }
                 } else {
                     counterPaint.setColor(textPaint.getColor());
+                }
+                if (bublikPills) {
+                    // On the filled pill the badge is dark ink, so its number takes the accent color.
+                    float selected = currentTab.id == id1 ? 1f : 0f;
+                    if ((animatingIndicator || manualScrollingToId != -1) && (currentTab.id == id1 || currentTab.id == id2)) {
+                        selected = currentTab.id == id1 ? animatingIndicatorProgress : 1f - animatingIndicatorProgress;
+                    }
+                    textCounterPaint.setColor(ColorUtils.blendARGB(textCounterPaint.getColor(), Theme.getColor(tabLineColorKey, resourcesProvider), selected));
                 }
 
                 float x;
@@ -1158,6 +1173,21 @@ public class FilterTabsView extends FrameLayout {
 
     BlurredBackgroundDrawable blurredBackgroundDrawable;
 
+    // Bublik Pro: every folder is its own pill, the selected one filled with the accent and dark text.
+    private static final int BUBLIK_PILL_INK = 0xFF04223A;
+    private boolean bublikPills;
+    private final Paint bublikPillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final RectF bublikPillRect = new RectF();
+
+    public void setBublikPills(boolean enabled) {
+        bublikPills = enabled;
+        if (enabled) {
+            setBackground(blurredBackgroundDrawable = null);
+        }
+        listView.invalidateViews();
+        invalidate();
+    }
+
     public void setBlurredBackground(BlurredBackgroundDrawable drawable) {
         setBackground(blurredBackgroundDrawable = drawable);
     }
@@ -1388,8 +1418,12 @@ public class FilterTabsView extends FrameLayout {
 
     @Override
     protected boolean drawChild(@NonNull Canvas canvas, View child, long drawingTime) {
+        // Bublik Pro: opaque pills go under the tab titles; Telegram's translucent selector stays on top.
+        if (child == listView && bublikPills) {
+            drawSelector(canvas);
+        }
         boolean result = super.drawChild(canvas, child, drawingTime);
-        if (child == listView) {
+        if (child == listView && !bublikPills) {
             drawSelector(canvas);
         }
         long newTime = SystemClock.elapsedRealtime();
@@ -1507,8 +1541,21 @@ public class FilterTabsView extends FrameLayout {
             final float add = additionalTabWidth / 2f;
 
             final int y = height / 2 - dp(14);
+            if (bublikPills) {
+                bublikPillPaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider));
+                for (int i = 0; i < listView.getChildCount(); i++) {
+                    final View child = listView.getChildAt(i);
+                    if (child instanceof TabView) {
+                        final TabView tab = (TabView) child;
+                        final float w = Math.max(dp(16), tab.tabWidth);
+                        final float x = tab.getX() + (tab.getMeasuredWidth() - w) / 2f;
+                        bublikPillRect.set(x - dp(TAB_INTERNAL_PADDING), y, x + w + dp(TAB_INTERNAL_PADDING), y + dp(28));
+                        canvas.drawRoundRect(bublikPillRect, dp(14), dp(14), bublikPillPaint);
+                    }
+                }
+            }
             selectorDrawable.setBounds((int) (indicatorX - dp(TAB_INTERNAL_PADDING) - add), y, (int) (indicatorX + indicatorWidth + dp(TAB_INTERNAL_PADDING) + add), y + dp(28));
-            selectorDrawable.setAlpha(31);
+            selectorDrawable.setAlpha(bublikPills ? 255 : 31);
             selectorDrawable.draw(canvas);
             canvas.restore();
         }

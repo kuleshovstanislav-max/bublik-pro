@@ -8,6 +8,7 @@
 
 package org.telegram.ui;
 
+import android.graphics.Typeface;
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.dpf2;
 import static org.telegram.messenger.AndroidUtilities.lerp;
@@ -505,6 +506,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     private boolean downloadsItemVisible;
     public ActionBarMenuItem searchItem;
     private ActionBarMenuItem optionsItem;
+    private ActionBarMenuItem bublikStoriesItem;
     private ActionBarMenuItem speedItem;
     public static boolean switchingTheme;
     private ActionBarMenuItem doneItem;
@@ -3438,6 +3440,13 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         });
         fragmentSearchFieldWatcher.setDoNotCloseAfterFieldEmpty();
 
+        if (initialDialogsType == DIALOGS_TYPE_DEFAULT && hasMainTabs && folderId == 0 && communityId == 0) {
+            // Bublik Pro: stories open from a header button instead of the avatar strip.
+            bublikStoriesItem = menu.addItem(1001, R.drawable.bublik_ph_stories_duotone);
+            bublikStoriesItem.setContentDescription(ApplicationLoader.applicationContext.getString(R.string.BublikStories));
+            bublikStoriesItem.setOnClickListener(v -> openBublikStories());
+            bublikStoriesItem.setVisibility(getStoriesController().hasStories() ? View.VISIBLE : View.GONE);
+        }
         if (initialDialogsType == DIALOGS_TYPE_DEFAULT) {
             optionsItem = menu.addItem(4, R.drawable.ic_ab_other);
             optionsItem.setContentDescription(LocaleController.getString(R.string.AccDescrMoreOptions));
@@ -3510,6 +3519,15 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 communityAvatarImage.setRoundRadius(dp(11));
                 communityAvatarImage.setForUserOrChat(community, communityAvatarDrawable);
                 actionBar.addView(communityAvatarImage, LayoutHelper.createFrame(32, 32, Gravity.BOTTOM | Gravity.LEFT, 58, 0, 0, 12f));
+            } else if (hasMainTabs) {
+                // Bublik Pro: a big bold "Chats" title instead of the Telegram logo.
+                statusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(null, dp(26));
+                statusDrawable.center = true;
+                actionBar.bublikTitleTextSize = 30;
+                final Typeface titleFace = AndroidUtilities.bublikFont(800, false);
+                actionBar.bublikTitleTypeface = titleFace != null ? titleFace : AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_EXTRA_BOLD);
+                actionBar.setTitle(getString(R.string.MainTabsChats), statusDrawable);
+                updateStatus(UserConfig.getInstance(currentAccount).getCurrentUser(), false);
             } else {
                 statusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(null, dp(26));
                 statusDrawable.center = true;
@@ -5161,6 +5179,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             filterTabsViewBackground.setPadding(dp(6.666f));
             filterTabsView.setPadding(0, dp(7), 0, dp(7));
             filterTabsView.setBlurredBackground(filterTabsViewBackground);
+            if (hasMainTabs) {
+                filterTabsView.setBublikPills(true);
+            }
             contentView.addView(filterTabsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36 + 7 + 7, Gravity.TOP, 4, 0, 4, 0));
         }
 
@@ -12749,6 +12770,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         return true;
     }
 
+    private void openBublikStories() {
+        final ArrayList<Long> peerIds = new ArrayList<>();
+        for (TL_stories.PeerStories peerStories : getStoriesController().getDialogListStories()) {
+            peerIds.add(DialogObject.getPeerDialogId(peerStories.peer));
+        }
+        if (!peerIds.isEmpty() && getContext() != null) {
+            getOrCreateStoryViewer().open(getContext(), null, peerIds, 0, null, null, null, false);
+        }
+    }
+
     public void updateStoriesVisibility(boolean animated) {
         if (dialogStoriesCell == null || storiesVisibilityAnimator != null || rightSlidingDialogContainer != null && rightSlidingDialogContainer.hasFragment() || searchIsShowed || actionBar == null || actionBar.isActionModeShowed() || onlySelect) {
             return;
@@ -12763,8 +12794,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         } else if (isArchive()) {
             newVisibility = !getStoriesController().getHiddenList().isEmpty();
         } else {
-            newVisibility = !onlySelfStories && getStoriesController().hasStories();
+            final boolean hasDialogStories = !onlySelfStories && getStoriesController().hasStories();
             onlySelfStories = getStoriesController().hasOnlySelfStories();
+            if (bublikStoriesItem != null) {
+                // Bublik Pro: no avatar strip in the main list, the header button opens stories instead.
+                bublikStoriesItem.setVisibility(hasDialogStories ? View.VISIBLE : View.GONE);
+                newVisibility = false;
+                onlySelfStories = false;
+            } else {
+                newVisibility = hasDialogStories;
+            }
         }
 
         hasOnlySlefStories = onlySelfStories;

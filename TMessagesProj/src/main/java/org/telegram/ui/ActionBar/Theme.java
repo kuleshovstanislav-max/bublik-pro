@@ -7679,7 +7679,7 @@ public class Theme {
 
             Resources resources = context.getResources();
 
-            avatarDrawables[0] = resources.getDrawable(R.drawable.chats_saved);
+            avatarDrawables[0] = resources.getDrawable(R.drawable.bublik_ph_saved_duotone); // Bublik Pro: Phosphor
             avatarDrawables[1] = resources.getDrawable(R.drawable.ghost);
             avatarDrawables[2] = resources.getDrawable(R.drawable.msg_folders_private);
             avatarDrawables[3] = resources.getDrawable(R.drawable.msg_folders_requests);
@@ -7688,9 +7688,9 @@ public class Theme {
             avatarDrawables[6] = resources.getDrawable(R.drawable.msg_folders_bots);
             avatarDrawables[7] = resources.getDrawable(R.drawable.msg_folders_muted);
             avatarDrawables[8] = resources.getDrawable(R.drawable.msg_folders_read);
-            avatarDrawables[9] = resources.getDrawable(R.drawable.msg_folders_archive);
+            avatarDrawables[9] = resources.getDrawable(R.drawable.bublik_ph_archive_duotone);
             avatarDrawables[10] = resources.getDrawable(R.drawable.msg_folders_private);
-            avatarDrawables[11] = resources.getDrawable(R.drawable.chats_replies);
+            avatarDrawables[11] = resources.getDrawable(R.drawable.bublik_ph_replies_duotone);
             avatarDrawables[12] = resources.getDrawable(R.drawable.other_chats);
             avatarDrawables[13] = resources.getDrawable(R.drawable.msg_stories_closefriends);
             avatarDrawables[14] = resources.getDrawable(R.drawable.filled_gift_premium);

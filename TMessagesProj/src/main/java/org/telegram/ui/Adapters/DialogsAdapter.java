@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
@@ -1094,7 +1095,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             case VIEW_TYPE_BUBLIK_SECTION: {
                 BublikSectionHeaderCell cell = (BublikSectionHeaderCell) holder.itemView;
                 final String title = (String) getItem(i);
-                cell.set(title, LocaleController.getString(R.string.BublikPinnedChats).equals(title) ? R.drawable.bublik_ph_pin_fill : R.drawable.bublik_ph_chats_fill);
+                cell.set(title, ApplicationLoader.applicationContext.getString(R.string.BublikPinnedChats).equals(title) ? R.drawable.bublik_ph_pin_fill : R.drawable.bublik_ph_chats_fill);
                 break;
             }
             case VIEW_TYPE_HEADER: {
@@ -1802,10 +1803,10 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                     if (bublikSections && !item.isFolder) {
                         if (item.pinned && !bublikHasPinned && !bublikHasOther) {
                             bublikHasPinned = true;
-                            itemInternals.add(new ItemInternal(VIEW_TYPE_BUBLIK_SECTION, LocaleController.getString(R.string.BublikPinnedChats)));
+                            itemInternals.add(new ItemInternal(VIEW_TYPE_BUBLIK_SECTION, ApplicationLoader.applicationContext.getString(R.string.BublikPinnedChats)));
                         } else if (!item.pinned && bublikHasPinned && !bublikHasOther) {
                             bublikHasOther = true;
-                            itemInternals.add(new ItemInternal(VIEW_TYPE_BUBLIK_SECTION, LocaleController.getString(R.string.BublikAllChats)));
+                            itemInternals.add(new ItemInternal(VIEW_TYPE_BUBLIK_SECTION, ApplicationLoader.applicationContext.getString(R.string.BublikAllChats)));
                         }
                     }
                     itemInternals.add(item);
