@@ -672,8 +672,29 @@ public class MessageDrawable extends Drawable {
         return path;
     }
 
+    private final float[] bublikRadii = new float[8];
+
     private void generatePath(Path path, Rect bounds, int padding, int rad, int smallRad, int nearRad, int top, boolean drawFullBottom, boolean drawFullTop, boolean customPaint) {
         path.rewind();
+        if (currentType != TYPE_PREVIEW) {
+            // Bublik Pro: tail-less, strongly rounded bubbles; corners towards grouped neighbours stay tight.
+            final float big = Math.min(overrideRoundRadius != 0 ? overrideRoundRadius : Math.max(rad, dp(22)), (bounds.height() - padding) / 2f);
+            final float tight = Math.min(nearRad, big);
+            final float left = isOut ? bounds.left + padding : bounds.left + dp(8);
+            final float right = isOut ? bounds.right - dp(8) : bounds.right - padding;
+            final float outerTop = isTopNear ? tight : big;
+            final float outerBottom = isBottomNear || botButtonsBottom ? tight : big;
+            // radii order: top-left, top-right, bottom-right, bottom-left (x, y each)
+            final float tl = isOut ? big : outerTop, tr = isOut ? outerTop : big;
+            final float br = isOut ? outerBottom : big, bl = isOut ? big : outerBottom;
+            bublikRadii[0] = bublikRadii[1] = tl;
+            bublikRadii[2] = bublikRadii[3] = tr;
+            bublikRadii[4] = bublikRadii[5] = br;
+            bublikRadii[6] = bublikRadii[7] = bl;
+            rect.set(left, bounds.top + padding, right, bounds.bottom - padding);
+            path.addRoundRect(rect, bublikRadii, Path.Direction.CW);
+            return;
+        }
         int heightHalf = (bounds.height() - padding) >> 1;
         if (rad > heightHalf) {
             rad = heightHalf;

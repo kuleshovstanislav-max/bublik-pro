@@ -413,6 +413,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private int lastMessageDate;
     private int unreadCount;
     private final Paint bublikRingPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint bublikMutedCountPaint;
     private final RectF bublikRingRect = new RectF();
 
     // Bublik Pro: a thin accent cookie ring around the avatar while the chat has unread messages
@@ -5322,6 +5323,20 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 restoreCountTextPaint = true;
             } else {
                 paint = drawCounterMuted || currentDialogFolderId != 0 ? Theme.dialogs_countGrayPaint : Theme.dialogs_countPaint;
+                if (Theme.isCurrentThemeDark()) {
+                    // Bublik Pro: accent pill with dark ink text, muted chats get a graphite pill with grey text.
+                    if (paint == Theme.dialogs_countGrayPaint) {
+                        if (bublikMutedCountPaint == null) {
+                            bublikMutedCountPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                        }
+                        bublikMutedCountPaint.setColor(0xFF2C2C2E);
+                        paint = bublikMutedCountPaint;
+                        Theme.dialogs_countTextPaint2.setColor(0xFFA1A1A8);
+                    } else {
+                        Theme.dialogs_countTextPaint2.setColor(0xFF04223A);
+                    }
+                    restoreCountTextPaint = true;
+                }
             }
 
             if (countOldLayout == null || unreadCount == 0) {

@@ -740,6 +740,13 @@ public class Theme {
 
                         currentColors.put(key_chat_outSentCheckRead, textColor);
                         currentColors.put(key_chat_outSentCheckReadSelected, textColor);
+                        if (parentTheme != null && "Night".equals(parentTheme.name)) {
+                            // Bublik Pro: accent read checks on the graphite outgoing bubbles.
+                            currentColors.put(key_chat_outSentCheck, 0xFF2E9BF0);
+                            currentColors.put(key_chat_outSentCheckSelected, 0xFF2E9BF0);
+                            currentColors.put(key_chat_outSentCheckRead, 0xFF2E9BF0);
+                            currentColors.put(key_chat_outSentCheckReadSelected, 0xFF2E9BF0);
+                        }
 
                         currentColors.put(key_chat_outSentClock, textColor);
                         currentColors.put(key_chat_outSentClockSelected, textColor);
@@ -1774,16 +1781,17 @@ public class Theme {
 
                 //override default themes
                 if (name.equals("Night")) {
-                    // Bublik Pro: Night is the Bublik Graphite theme, blue outgoing bubbles on a graphite wallpaper.
-                    themeAccent.myMessagesAccentColor = 0xff2e9bf0;
-                    themeAccent.myMessagesGradientAccentColor1 = 0xff2e7bc4;
+                    // Bublik Pro: Night is the Bublik Graphite theme: graphite-blue outgoing bubbles on a plain graphite chat.
+                    themeAccent.myMessagesAccentColor = 0xff1e2a38;
+                    themeAccent.myMessagesGradientAccentColor1 = 0;
                     themeAccent.myMessagesGradientAccentColor2 = 0;
                     themeAccent.myMessagesGradientAccentColor3 = 0;
-                    themeAccent.patternIntensity = -0.57f;
-                    themeAccent.backgroundOverrideColor = 0xff1c1c1e;
-                    themeAccent.backgroundGradientOverrideColor1 = 0xff0e0e0e;
-                    themeAccent.backgroundGradientOverrideColor2 = 0xff161618;
-                    themeAccent.backgroundGradientOverrideColor3 = 0xff0e0e0e;
+                    themeAccent.patternSlug = "";
+                    themeAccent.patternIntensity = 0;
+                    themeAccent.backgroundOverrideColor = 0xff0e0e0e;
+                    themeAccent.backgroundGradientOverrideColor1 = 0x100000000L;
+                    themeAccent.backgroundGradientOverrideColor2 = 0x100000000L;
+                    themeAccent.backgroundGradientOverrideColor3 = 0x100000000L;
                 } else if (isHome(themeAccent) && name.equals("Dark Blue")) {
                     themeAccent.myMessagesAccentColor = 0xff258DE5;
                     themeAccent.myMessagesGradientAccentColor1 = 0xff4272DF;
