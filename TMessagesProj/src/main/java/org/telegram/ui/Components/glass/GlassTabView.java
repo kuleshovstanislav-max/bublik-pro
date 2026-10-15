@@ -16,6 +16,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -73,6 +74,9 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
     private boolean usePremiumCounter;
 
     private TabAnimation tabAnimation;
+    // Bublik Pro: Phosphor duotone icon when idle, fill when selected (0 = use Telegram's Lottie icon).
+    private int bublikIconIdle;
+    private int bublikIconSelected;
     private TLRPC.TL_attachMenuBot tabAnimationBot;
 
     private final TextPaint defaultTextPaint;
@@ -154,7 +158,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         if (selectedFactor > 0 && !skipDrawSelector) {
             final float alpha = AnimatorUtils.DECELERATE_INTERPOLATOR.getInterpolation(selectedFactor);
 
-            paintCounterBackground.setColor(Theme.multAlpha(colorSelected, 0.09f * alpha));
+            paintCounterBackground.setColor(Theme.multAlpha(colorSelected, (bublikIconIdle != 0 ? 0.2f : 0.09f) * alpha));
             tmpRectF.set(0, 0, viewWidth, getHeight());
             final float r = Math.min(tmpRectF.width(), tmpRectF.height()) / 2f;
             final float s = lerp(0.6f, 1, selectedFactor) * MathUtils.clamp(attachScale, 0, 1);
@@ -306,6 +310,20 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
             return;
         }
 
+        if (bublikIconIdle != 0) {
+            final boolean wasSelected = lastIsSelected;
+            lastIsSelected = isSelected;
+            imageView.setImageResource(isSelected ? bublikIconSelected : bublikIconIdle);
+            if (animated && isSelected && !wasSelected) {
+                imageView.animate().cancel();
+                imageView.setScaleX(0.7f);
+                imageView.setScaleY(0.7f);
+                imageView.animate().scaleX(1f).scaleY(1f).setDuration(420).setInterpolator(new OvershootInterpolator(3f)).start();
+            }
+            updateColors();
+            return;
+        }
+
         if (tabAnimation == null) {
             return;
         }
@@ -401,6 +419,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         GlassTabView tab = new GlassTabView(context);
         tab.resourcesProvider = resourcesProvider;
         tab.tabAnimation = tabAnimation;
+        tab.setBublikIcons(tabAnimation);
         tab.textView.setText(LocaleController.getString(stringRes));
         tab.checkPlayAnimation(false);
         tab.imageView.setLayoutParams(LayoutHelper.createFrame(24, 24, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 4, 0, 0));
@@ -430,6 +449,22 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         tab.colorSelectedText = Theme.getColor(Theme.key_glass_tabSelectedText, resourcesProvider);
         tab.updateColors();
         return tab;
+    }
+
+    private void setBublikIcons(TabAnimation tabAnimation) {
+        if (tabAnimation == TabAnimation.CHATS) {
+            bublikIconIdle = R.drawable.bublik_ph_chats_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_chats_fill;
+        } else if (tabAnimation == TabAnimation.CONTACTS) {
+            bublikIconIdle = R.drawable.bublik_ph_contacts_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_contacts_fill;
+        } else if (tabAnimation == TabAnimation.CALLS) {
+            bublikIconIdle = R.drawable.bublik_ph_calls_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_calls_fill;
+        } else if (tabAnimation == TabAnimation.SETTINGS) {
+            bublikIconIdle = R.drawable.bublik_ph_settings_duotone;
+            bublikIconSelected = R.drawable.bublik_ph_settings_fill;
+        }
     }
 
     public void updateUserAvatar(int currentAccount) {

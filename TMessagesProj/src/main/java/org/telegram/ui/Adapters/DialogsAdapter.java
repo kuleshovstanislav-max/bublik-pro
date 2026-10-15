@@ -53,6 +53,7 @@ import org.telegram.tgnet.tl.TL_chatlists;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ArchiveHintCell;
+import org.telegram.ui.Cells.BublikSectionHeaderCell;
 import org.telegram.ui.Cells.DialogCell;
 import org.telegram.ui.Cells.DialogMeUrlCell;
 import org.telegram.ui.Cells.DialogsEmptyCell;
@@ -110,7 +111,8 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             VIEW_TYPE_GRAY_SECTION = 20,
             VIEW_TYPE_FORWARD_TO_STORIES_CELL = 21,
             VIEW_TYPE_HEADER_3 = 22,
-            VIEW_TYPE_DIALOG_COMMUNITY = 23;
+            VIEW_TYPE_DIALOG_COMMUNITY = 23,
+            VIEW_TYPE_BUBLIK_SECTION = 24;
 
     private Context mContext;
     private ArchiveHintCell archiveHintCell;
@@ -181,7 +183,16 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
         isReordering = reordering;
     }
 
+    private boolean isBublikSectionsList() {
+        return communityId == 0 && (dialogsType == DialogsActivity.DIALOGS_TYPE_DEFAULT || dialogsType == 7 || dialogsType == 8);
+    }
+
     public int fixPosition(int position) {
+        for (int i = 0; i < position && i < itemInternals.size(); i++) {
+            if (itemInternals.get(i).viewType == VIEW_TYPE_BUBLIK_SECTION) {
+                position--;
+            }
+        }
         if (hasChatlistHint) {
             position--;
         }
@@ -636,7 +647,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
     @Override
     public boolean isEnabled(RecyclerView.ViewHolder holder) {
         int viewType = holder.getItemViewType();
-        return viewType != VIEW_TYPE_FLICKER && viewType != VIEW_TYPE_EMPTY && viewType != VIEW_TYPE_DIVIDER &&
+        return viewType != VIEW_TYPE_BUBLIK_SECTION && viewType != VIEW_TYPE_FLICKER && viewType != VIEW_TYPE_EMPTY && viewType != VIEW_TYPE_DIVIDER &&
                 viewType != VIEW_TYPE_SHADOW && viewType != VIEW_TYPE_HEADER &&
                 viewType != VIEW_TYPE_LAST_EMPTY && viewType != VIEW_TYPE_NEW_CHAT_HINT && viewType != VIEW_TYPE_CONTACTS_FLICKER &&
                 viewType != VIEW_TYPE_REQUIREMENTS && viewType != VIEW_TYPE_REQUIRED_EMPTY && viewType != VIEW_TYPE_STORIES && viewType != VIEW_TYPE_ARCHIVE_FULLSCREEN && viewType != VIEW_TYPE_GRAY_SECTION;
@@ -750,6 +761,9 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
                 break;
             case VIEW_TYPE_HEADER_3:
                 view = new HeaderCell(mContext);
+                break;
+            case VIEW_TYPE_BUBLIK_SECTION:
+                view = new BublikSectionHeaderCell(mContext, null);
                 break;
             case VIEW_TYPE_HEADER:
                 view = new HeaderCell(mContext);
@@ -1075,6 +1089,12 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             case VIEW_TYPE_HEADER_3: {
                 HeaderCell cell = (HeaderCell) holder.itemView;
                 cell.setText((String) getItem(i));
+                break;
+            }
+            case VIEW_TYPE_BUBLIK_SECTION: {
+                BublikSectionHeaderCell cell = (BublikSectionHeaderCell) holder.itemView;
+                final String title = (String) getItem(i);
+                cell.set(title, LocaleController.getString(R.string.BublikPinnedChats).equals(title) ? R.drawable.bublik_ph_pin_fill : R.drawable.bublik_ph_chats_fill);
                 break;
             }
             case VIEW_TYPE_HEADER: {
@@ -1771,11 +1791,24 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
         }
 
         if (!stopUpdate) {
+            // Bublik Pro: label the pinned and the other chats so the list shows them as two cards.
+            final boolean bublikSections = isBublikSectionsList();
+            boolean bublikHasPinned = false, bublikHasOther = false;
             for (int k = 0; k < array.size(); k++) {
                 if (dialogsType == DialogsActivity.DIALOGS_TYPE_ADD_USERS_TO && array.get(k) instanceof DialogsActivity.DialogsHeader) {
                     itemInternals.add(new ItemInternal(VIEW_TYPE_HEADER_2, array.get(k)));
                 } else {
-                    itemInternals.add(new ItemInternal(VIEW_TYPE_DIALOG, array.get(k)));
+                    final ItemInternal item = new ItemInternal(VIEW_TYPE_DIALOG, array.get(k));
+                    if (bublikSections && !item.isFolder) {
+                        if (item.pinned && !bublikHasPinned && !bublikHasOther) {
+                            bublikHasPinned = true;
+                            itemInternals.add(new ItemInternal(VIEW_TYPE_BUBLIK_SECTION, LocaleController.getString(R.string.BublikPinnedChats)));
+                        } else if (!item.pinned && bublikHasPinned && !bublikHasOther) {
+                            bublikHasOther = true;
+                            itemInternals.add(new ItemInternal(VIEW_TYPE_BUBLIK_SECTION, LocaleController.getString(R.string.BublikAllChats)));
+                        }
+                    }
+                    itemInternals.add(item);
                 }
             }
 

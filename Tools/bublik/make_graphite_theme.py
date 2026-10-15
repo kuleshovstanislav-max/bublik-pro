@@ -31,6 +31,17 @@ EXACT = {
     "chats_unreadCounter": 0xFF2E9BF0,
     "switchTrackChecked": 0xFF2E9BF0,
     "chat_outBubble": 0xFF2E7BC4,
+    # Bottom tab bar (keys missing upstream, so Night used to fall back to light-theme defaults).
+    "glass_tabSelected": 0xFF2E9BF0,
+    "glass_tabSelectedText": 0xFFF2F7FC,
+    "glass_tabUnselected": 0xFF8E8E93,
+    "glass_targetMainTabs": 0xFF1C1C1E,
+    "glass_targetMainTopPanel": 0xFF1C1C1E,
+    # Round compose button.
+    "featuredStickers_addButton": 0xFF2E9BF0,
+    "featuredStickers_addButtonPressed": 0xFF2683CC,
+    # Pinned chats already sit in their own card.
+    "chats_pinnedOverlay": 0x00000000,
 }
 
 

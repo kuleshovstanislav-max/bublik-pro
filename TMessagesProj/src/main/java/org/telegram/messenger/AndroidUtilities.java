@@ -259,9 +259,43 @@ public class AndroidUtilities {
     public static ThreadLocal<byte[]> readBufferLocal = new ThreadLocal<>();
     public static ThreadLocal<byte[]> bufferLocal = new ThreadLocal<>();
 
+    // Bublik Pro: the Pixel's system Google Sans Flex, used at runtime and never bundled. Null when the phone lacks it.
+    private static final String BUBLIK_FONT_FAMILY = "google-sans-flex";
+    private static Boolean bublikFontAvailable;
+    private static final Hashtable<String, Typeface> bublikFontCache = new Hashtable<>();
+
+    public static Typeface bublikFont(int weight, boolean italic) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            return null;
+        }
+        if (bublikFontAvailable == null) {
+            final Typeface probe = Typeface.create(BUBLIK_FONT_FAMILY, Typeface.NORMAL);
+            bublikFontAvailable = probe != null && !probe.equals(Typeface.create((String) null, Typeface.NORMAL));
+        }
+        if (!bublikFontAvailable) {
+            return null;
+        }
+        final String key = weight + (italic ? "i" : "");
+        Typeface typeface = bublikFontCache.get(key);
+        if (typeface == null) {
+            typeface = Typeface.create(Typeface.create(BUBLIK_FONT_FAMILY, Typeface.NORMAL), weight, italic);
+            bublikFontCache.put(key, typeface);
+        }
+        return typeface;
+    }
+
+    /** Regular text face: Google Sans Flex where available, the system default otherwise. */
+    public static Typeface regular() {
+        final Typeface typeface = bublikFont(400, false);
+        return typeface != null ? typeface : Typeface.DEFAULT;
+    }
+
     public static Typeface bold() {
         if (mediumTypeface == null) {
-            if (SharedConfig.useSystemBoldFont && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            final Typeface bublik = bublikFont(500, false);
+            if (bublik != null) {
+                mediumTypeface = bublik;
+            } else if (SharedConfig.useSystemBoldFont && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 mediumTypeface = Typeface.create(null, 500, false);
             } else {
                 mediumTypeface = getTypeface(TYPEFACE_ROBOTO_MEDIUM);
@@ -2392,6 +2426,14 @@ public class AndroidUtilities {
     public static Typeface getTypeface(String assetPath) {
         synchronized (typefaceCache) {
             if (!typefaceCache.containsKey(assetPath)) {
+                final Typeface bublik = TYPEFACE_ROBOTO_MEDIUM.equals(assetPath) ? bublikFont(500, false)
+                        : TYPEFACE_ROBOTO_EXTRA_BOLD.equals(assetPath) ? bublikFont(800, false)
+                        : TYPEFACE_ROBOTO_MEDIUM_ITALIC.equals(assetPath) ? bublikFont(500, true)
+                        : null;
+                if (bublik != null) {
+                    typefaceCache.put(assetPath, bublik);
+                    return bublik;
+                }
                 try {
                     Typeface t;
                     if (Build.VERSION.SDK_INT >= 26) {

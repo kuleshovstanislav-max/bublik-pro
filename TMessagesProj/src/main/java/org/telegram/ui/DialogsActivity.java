@@ -2979,7 +2979,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
         BirthdayController.getInstance(currentAccount).check();
         additionNavigationBarHeight = hasMainTabs ? dp(MAIN_TABS_HEIGHT_WITH_MARGINS) : 0;
-        additionFloatingButtonOffset = hasMainTabs ? dp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN) : 0;
+        // Bublik Pro: the compose button sits beside the main tabs pill, not above it.
+        additionFloatingButtonOffset = 0;
 
         return true;
     }
@@ -4072,6 +4073,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             viewPage.listView.setPivotY(0);
             if (initialDialogsType == DIALOGS_TYPE_BOT_REQUEST_PEER) {
                 viewPage.listView.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
+            } else if (hasMainTabs) {
+                // Bublik Pro: chats grouped into rounded cards on the graphite page.
+                viewPage.listView.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
+                viewPage.listView.setSections(view -> view instanceof DialogCell, dp(12), dp(24), viewPage.listView::drawBackgroundRect, false);
             }
             viewPage.dialogsItemAnimator = new DialogsItemAnimator(viewPage.listView) {
                 @Override
@@ -4708,7 +4713,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         topBubblesFadeView = new DialogsActivityTopBubblesFadeView(context);
-        topBubblesFadeView.setColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+        topBubblesFadeView.setColor(Theme.getColor(hasMainTabs ? Theme.key_windowBackgroundGray : Theme.key_windowBackgroundWhite));
         contentView.addView(topBubblesFadeView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 100, Gravity.TOP));
 
         searchViewPagerIndex = contentView.getChildCount();
@@ -4739,7 +4744,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         contentView.addView(floatingButtonStories, FragmentFloatingButton.createSubButtonLayoutParams());
 
         floatingButton3 = new FragmentFloatingButton(context, resourceProvider);
-        contentView.addView(floatingButton3, FragmentFloatingButton.createDefaultLayoutParams());
+        contentView.addView(floatingButton3, hasMainTabs
+                ? LayoutHelper.createFrame(MAIN_TABS_HEIGHT, MAIN_TABS_HEIGHT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.BOTTOM, MAIN_TABS_MARGIN, 0, MAIN_TABS_MARGIN, MAIN_TABS_MARGIN)
+                : FragmentFloatingButton.createDefaultLayoutParams());
         floatingButton3.setOnClickListener(v -> {
             if (parentLayout != null && parentLayout.isInPreviewMode()) {
                 finishPreviewFragment();
@@ -8889,7 +8896,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             floatingButton3.setImageResource(R.drawable.floating_check);
             floatingButton3.setContentDescription(LocaleController.getString(R.string.Done));
         } else {
-            floatingButton3.setImageResource(R.drawable.filled_fab_compose_32);
+            floatingButton3.setImageResource(hasMainTabs ? R.drawable.bublik_ph_compose_fill : R.drawable.filled_fab_compose_32);
             floatingButton3.setContentDescription(LocaleController.getString(R.string.NewMessageTitle));
         }
     }
@@ -12093,7 +12100,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 topPanelLayout.updateColors();
             }
             if (topBubblesFadeView != null) {
-                topBubblesFadeView.setColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+                topBubblesFadeView.setColor(Theme.getColor(hasMainTabs ? Theme.key_windowBackgroundGray : Theme.key_windowBackgroundWhite));
             }
             if (fragmentContextView != null) {
                 fragmentContextView.updateColors();
