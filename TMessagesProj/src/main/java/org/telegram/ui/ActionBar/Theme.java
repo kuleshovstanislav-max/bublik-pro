@@ -1773,18 +1773,22 @@ public class Theme {
                 }
 
                 //override default themes
-                if (isHome(themeAccent) && name.equals("Dark Blue") || name.equals("Night")) {
+                if (name.equals("Night")) {
+                    // Bublik Pro: Night is the Bublik Graphite theme, blue outgoing bubbles on a graphite wallpaper.
+                    themeAccent.myMessagesAccentColor = 0xff2e9bf0;
+                    themeAccent.myMessagesGradientAccentColor1 = 0xff2e7bc4;
+                    themeAccent.myMessagesGradientAccentColor2 = 0;
+                    themeAccent.myMessagesGradientAccentColor3 = 0;
+                    themeAccent.patternIntensity = -0.57f;
+                    themeAccent.backgroundOverrideColor = 0xff1c1c1e;
+                    themeAccent.backgroundGradientOverrideColor1 = 0xff0e0e0e;
+                    themeAccent.backgroundGradientOverrideColor2 = 0xff161618;
+                    themeAccent.backgroundGradientOverrideColor3 = 0xff0e0e0e;
+                } else if (isHome(themeAccent) && name.equals("Dark Blue")) {
                     themeAccent.myMessagesAccentColor = 0xff258DE5;
                     themeAccent.myMessagesGradientAccentColor1 = 0xff4272DF;
                     themeAccent.myMessagesGradientAccentColor2 = 0xff8146D7;
                     themeAccent.myMessagesGradientAccentColor3 = 0xff9F3EAA;
-                    if (name.equals("Night")) {
-                        themeAccent.patternIntensity = -0.57f;
-                        themeAccent.backgroundOverrideColor = 0xff6c7fa6;
-                        themeAccent.backgroundGradientOverrideColor1 = 0xff2e344b;
-                        themeAccent.backgroundGradientOverrideColor2 = 0xff7874a7;
-                        themeAccent.backgroundGradientOverrideColor3 = 0xff333258;
-                    }
                 }
                 themeAccentsMap.put(themeAccent.id, themeAccent);
                 themeAccents.add(themeAccent);
@@ -4000,7 +4004,7 @@ public class Theme {
         themeInfo.previewOutColor = 0xff75A2E6;
         themeInfo.sortIndex = 4;
         themeInfo.setAccentColorOptions(
-                new int[]    {                    0xFF6ABE3F,                    0xFF8D78E3,                    0xFFDE5E7E,                    0xFF5977E8,                    0xFFDBC11A,                    0xff3e88f7,                    0xff4ab5d3,                    0xff4ab841,                    0xffd95576,                    0xffe27d2b,                    0xff936cda,                    0xffd04336,                    0xffe8ae1c,                    0xff7988a3 },
+                new int[]    {                    0xFF6ABE3F,                    0xFF8D78E3,                    0xFFDE5E7E,                    0xFF5977E8,                    0xFFDBC11A,                    0xFF2E9BF0,                    0xff4ab5d3,                    0xff4ab841,                    0xffd95576,                    0xffe27d2b,                    0xff936cda,                    0xffd04336,                    0xffe8ae1c,                    0xff7988a3 },
                 new int[]    {                    0xFF8A5294,                    0xFFB46C1B,                    0xFFAF4F6F,                    0xFF266E8D,                    0xFF744EB7,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000 },
                 new int[]    {                    0xFF6855BB,                    0xFFA53B4A,                    0xFF62499C,                    0xFF2F919D,                    0xFF298B95,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000,                    0x00000000 },
                 new int[]    {                    0xFF16131c,                    0xFF1e1118,                    0xFF0f0b10,                    0xFF090c0c,                    0xFF071519,                    0xff0d0e17,                    0xff111b1c,                    0xff0c110c,                    0xff0e0b0d,                    0xff1d160f,                    0xff09090a,                    0xff1c1210,                    0xff1d1b18,                    0xff0e1012 },
@@ -4284,6 +4288,24 @@ public class Theme {
             applyingTheme = defaultTheme;
         } else {
             currentDayTheme = applyingTheme;
+        }
+
+        // Bublik Pro: switch once to Bublik Graphite (the reworked Night theme) and keep it on regardless of the
+        // system dark mode. Users can still pick any other theme in Settings afterwards.
+        if (!preferences.getBoolean("bublikGraphiteApplied", false)) {
+            ThemeInfo graphite = themesDict.get("Night");
+            if (graphite != null) {
+                applyingTheme = currentDayTheme = currentNightTheme = graphite;
+                selectedAutoNightType = AUTO_NIGHT_TYPE_NONE;
+                graphite.currentAccentId = 0;
+                themeConfig.edit().putInt("accent_current_" + graphite.assetName, 0).apply();
+                preferences.edit()
+                        .putString("theme", graphite.getKey())
+                        .putString("nighttheme", graphite.getKey())
+                        .putInt("selectedAutoNightType", AUTO_NIGHT_TYPE_NONE)
+                        .putBoolean("bublikGraphiteApplied", true)
+                        .apply();
+            }
         }
 
         if (preferences.contains("overrideThemeWallpaper") || preferences.contains("selectedBackground2")) {
