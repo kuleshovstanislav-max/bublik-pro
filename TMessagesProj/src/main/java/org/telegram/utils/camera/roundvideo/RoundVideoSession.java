@@ -890,6 +890,18 @@ public final class RoundVideoSession {
 
     /** Returns the current recording duration, including the active segment. */
     @MainThread
+    /**
+     * Bublik Pro: true when a fixed-bitrate recording has already grown past Telegram's round
+     * video limit (~12 MiB), so sending it now would arrive as a plain video.
+     */
+    public boolean isOverRoundSizeLimit() {
+        RoundVideoMp4Writer current = writer;
+        return sizeBudgetBytes <= 0 && current != null
+                && current.getWrittenBytes() > ROUND_SIZE_WARNING_BYTES;
+    }
+
+    private static final long ROUND_SIZE_WARNING_BYTES = 12_400_000L;
+
     public long getRecordedDurationMs() {
         requireMainThread();
         if (state != State.RECORDING) return recordedDurationMs;

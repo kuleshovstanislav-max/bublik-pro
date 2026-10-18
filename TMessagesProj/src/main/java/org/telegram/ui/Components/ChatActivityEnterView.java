@@ -14337,8 +14337,12 @@ public class ChatActivityEnterView extends FrameLayout implements
                 textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
                 textPaint.setTextSize(dp(15));
                 textPaint.setTypeface(AndroidUtilities.bold());
-                textPaint.setColor(getThemedColor(Theme.key_chat_recordTime));
             }
+            // Bublik Pro: orange timer once a fixed-bitrate round no longer fits Telegram's limit.
+            boolean overRoundLimit = isInVideoMode() && parentFragment != null
+                    && parentFragment.instantCameraView != null
+                    && parentFragment.instantCameraView.isOverRoundSizeLimit();
+            textPaint.setColor(overRoundLimit ? 0xFFFF9F0A : getThemedColor(Theme.key_chat_recordTime));
             long currentTimeMillis = System.currentTimeMillis();
             long t = isRunning
                     ? externalFrameClock ? externalElapsedMs : currentTimeMillis - startTime

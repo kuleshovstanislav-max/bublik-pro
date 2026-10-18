@@ -1397,4 +1397,10 @@ public final class InstantCameraView2 extends InstantCameraViewBase {
             this.stars = stars;
         }
     }
+
+    @Override
+    public boolean isOverRoundSizeLimit() {
+        return session != null && session.isOverRoundSizeLimit();
+    }
+
 }

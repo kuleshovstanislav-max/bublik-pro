@@ -112,6 +112,11 @@ public abstract class InstantCameraViewBase extends FrameLayout {
     /** Switches between recording and recorded-video preview. */
     public abstract void togglePause();
 
+    /** Bublik Pro: the recording no longer fits Telegram's round video size limit. */
+    public boolean isOverRoundSizeLimit() {
+        return false;
+    }
+
     /** Returns whether recording is paused or changing pause state. */
     public abstract boolean isPaused();
 
