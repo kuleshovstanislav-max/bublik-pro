@@ -1025,6 +1025,9 @@ public class VoIPFragment implements
 
         callingUserPhotoViewMini = new ImageWithWavesView(context);
         AvatarDrawable avatarDrawable = new AvatarDrawable();
+        // Bublik Pro: cookie avatar on the call screen.
+        avatarDrawable.bublikCookie = true;
+        callingUserPhotoViewMini.setBublikCookie(true);
         avatarDrawable.setInfo(callingUser);
         callingUserPhotoViewMini.setImage(ImageLocation.getForUserOrChat(currentAccount, callingUser, ImageLocation.TYPE_BIG), null, avatarDrawable, callingUser);
         callingUserPhotoViewMini.setRoundRadius(AndroidUtilities.dp(135) / 2);

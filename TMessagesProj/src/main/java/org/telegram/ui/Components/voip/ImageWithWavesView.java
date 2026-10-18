@@ -56,6 +56,10 @@ public class ImageWithWavesView extends FrameLayout {
         backupImageView.setImage(imageLocation, imageFilter, thumb, parentObject);
     }
 
+    public void setBublikCookie(boolean value) {
+        backupImageView.getImageReceiver().bublikCookie = value;
+    }
+
     public void setRoundRadius(int value) {
         backupImageView.setRoundRadius(value);
     }

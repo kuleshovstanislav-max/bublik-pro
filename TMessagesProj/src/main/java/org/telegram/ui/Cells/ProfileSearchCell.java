@@ -158,6 +158,9 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         avatarImage = new ImageReceiver(this);
         avatarImage.setRoundRadius(dp(23));
         avatarDrawable = new AvatarDrawable();
+        // Bublik Pro: cookie avatars in the calls list and search results.
+        avatarImage.bublikCookie = true;
+        avatarDrawable.bublikCookie = true;
 
         checkBox = new CheckBox2(context, 21, resourcesProvider);
         checkBox.setColor(-1, Theme.key_windowBackgroundWhite, Theme.key_checkboxCheck);

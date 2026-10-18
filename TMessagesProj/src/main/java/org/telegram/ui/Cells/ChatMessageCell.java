@@ -1935,6 +1935,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         avatarImage.setAllowLoadingOnAttachedOnly(true);
         avatarImage.setRoundRadius(dp(21));
         avatarDrawable = new AvatarDrawable();
+        // Bublik Pro: cookie avatars next to group messages, like in the chat list.
+        avatarImage.bublikCookie = true;
+        avatarDrawable.bublikCookie = true;
         replyImageReceiver = new ImageReceiver(this);
         replyImageReceiver.setAllowLoadingOnAttachedOnly(true);
         replyImageReceiver.setRoundRadius(dp(4));
