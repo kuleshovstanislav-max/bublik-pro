@@ -379,11 +379,14 @@ public final class InstantCameraView2 extends InstantCameraViewBase {
         showInitialPlaceholder();
         upload = new TelegramRoundVideoUpload(currentAccount, secretChat);
         activeOutputResolution = SharedSettings.roundVideoOutputResolution.get();
+        final int bitrateSetting = SharedSettings.roundVideoVideoBitrate.get();
+        final boolean autoBitrate = bitrateSetting == SharedSettings.ROUND_VIDEO_BITRATE_AUTO;
         session = new RoundVideoSession.Builder(getContext(), textureView)
                 .setOutputDirectory(new File(ApplicationLoader.getFilesDirFixed(), "cache"))
                 .setInitialFacing(SharedSettings.roundVideoLastCamera.get())
                 .setOutputResolution(activeOutputResolution)
-                .setVideoBitrate(SharedSettings.roundVideoVideoBitrate.get())
+                .setVideoBitrate(autoBitrate ? SharedSettings.ROUND_VIDEO_AUTO_START_BITRATE : bitrateSetting)
+                .setSizeBudgetBytes(autoBitrate ? SharedSettings.ROUND_VIDEO_SIZE_BUDGET_BYTES : 0)
                 .setCameraResolution(SharedSettings.roundVideoCameraResolution.get())
                 .setFrameRate(SharedSettings.roundVideoFrameRate.get())
                 .setCompositionEnabled(SharedSettings.roundVideoComposition.get())

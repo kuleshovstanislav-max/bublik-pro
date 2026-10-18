@@ -20,8 +20,14 @@ public final class SharedSettings {
     public static final EnumSetting<RoundVideoSession.FrameRate> roundVideoFrameRate =
         EnumSetting.of("round_video_frame_rate", RoundVideoSession.FrameRate.FPS_30);
 
+    // Bublik Pro: 0 means "Auto": start at 2 Mbps and lower the bitrate while recording so the
+    // file stays under Telegram's ~12 MiB round video limit. New key, so everyone starts on Auto.
+    public static final int ROUND_VIDEO_BITRATE_AUTO = 0;
+    public static final int ROUND_VIDEO_AUTO_START_BITRATE = 2_000_000;
+    public static final long ROUND_VIDEO_SIZE_BUDGET_BYTES = 11_800_000L;
+
     public static final IntSetting roundVideoVideoBitrate =
-        IntSetting.of("round_video_video_bitrate", 4_000_000);
+        IntSetting.of("round_video_bitrate_v2", ROUND_VIDEO_BITRATE_AUTO);
 
     public static final BooleanSetting roundVideoComposition =
         BooleanSetting.of("round_video_composition", false);

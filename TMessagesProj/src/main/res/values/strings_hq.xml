@@ -5,4 +5,5 @@
     <string name="BublikAllChats">All chats</string>
     <string name="BublikStories">Stories</string>
     <string name="BublikGooglePhotos">Photos</string>
+    <string name="BublikRoundBitrateAuto">Auto (up to 2 Mbps)</string>
 </resources>

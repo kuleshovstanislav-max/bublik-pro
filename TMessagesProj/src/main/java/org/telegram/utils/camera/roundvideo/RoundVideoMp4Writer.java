@@ -44,6 +44,10 @@ final class RoundVideoMp4Writer {
     private boolean firstVideoSampleLogged;
     private boolean suppressAvailableNotifications;
     private boolean finished;
+    // Bublik Pro: size budget for the "Auto" bitrate (0 = off) and what has been written so far.
+    private volatile long sizeBudgetBytes;
+    private long writtenBytes;
+    private long videoTimelineUs;
 
     RoundVideoMp4Writer(
             @NonNull File file,
@@ -57,6 +61,22 @@ final class RoundVideoMp4Writer {
         this.includeAudio = includeAudio;
         this.diagnostics = diagnostics;
         this.listener = listener;
+    }
+
+    void setSizeBudgetBytes(long bytes) {
+        sizeBudgetBytes = bytes;
+    }
+
+    long getSizeBudgetBytes() {
+        return sizeBudgetBytes;
+    }
+
+    synchronized long getWrittenBytes() {
+        return writtenBytes;
+    }
+
+    synchronized long getVideoTimelineUs() {
+        return videoTimelineUs;
     }
 
     @NonNull
@@ -92,6 +112,8 @@ final class RoundVideoMp4Writer {
     ) throws IOException {
         if (finished || !video && !includeAudio || sourceInfo.size <= 0) return;
         MediaCodec.BufferInfo info = copyInfo(video, sourceInfo, timelineOffsetUs);
+        writtenBytes += sourceInfo.size;
+        if (video && info.presentationTimeUs > videoTimelineUs) videoTimelineUs = info.presentationTimeUs;
         if (builder == null) {
             ByteBuffer copy = ByteBuffer.allocateDirect(sourceInfo.size);
             source.position(sourceInfo.offset);

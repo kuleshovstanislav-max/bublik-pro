@@ -253,6 +253,8 @@ final class RoundVideoCodecRecorder implements RoundVideoGlProcessor.FrameTiming
                 .getCapabilitiesForType(MediaFormat.MIMETYPE_VIDEO_AVC);
         MediaCodecInfo.VideoCapabilities capabilities = codecCapabilities.getVideoCapabilities();
         int bitrate = capabilities.getBitrateRange().clamp(videoBitrate);
+        bitrateRange = capabilities.getBitrateRange();
+        currentVideoBitrate = bitrate;
         format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
         if (outputSize >= 640) {
             applyHighQualityEncoderSettings(format, codecCapabilities);
@@ -348,6 +350,7 @@ final class RoundVideoCodecRecorder implements RoundVideoGlProcessor.FrameTiming
                         if (info.presentationTimeUs < stopPresentationTimeUs) {
                             videoBuffers++;
                             videoBytes += info.size;
+                            fitSizeBudget(info.presentationTimeUs);
                             recordSampleStats(true, info);
                             recordCodecLatency(info.presentationTimeUs);
                             writeSample(true, videoCodec.getOutputBuffer(index), info);
@@ -362,6 +365,49 @@ final class RoundVideoCodecRecorder implements RoundVideoGlProcessor.FrameTiming
         } catch (RuntimeException e) {
             if (!stopping) reportError(e);
             else diagnostics.error("video drain failed while stopping", e);
+        }
+    }
+
+    // Bublik Pro: "Auto" bitrate. Telegram's server turns rounds bigger than ~12 MiB into plain
+    // videos, so while recording we keep enough budget for the rest of the 60 s at a floor
+    // bitrate and spend whatever is left over the next few seconds, capped at the chosen bitrate.
+    // Short rounds stay at full quality; long ones slide smoothly towards the floor.
+    private static final long BUDGET_MAX_DURATION_US = 60_000_000L;
+    private static final long BUDGET_FLOOR_BPS = 1_000_000L;
+    private static final long BUDGET_MIN_BPS = 750_000L;
+    // VBR overshoots the requested bitrate by a few percent; keep that in the reserve.
+    private static final double BUDGET_OVERSHOOT = 1.06;
+    private static final double BUDGET_LOOKAHEAD_S = 15.0;
+    private static final long BUDGET_CHECK_US = 500_000L;
+    private android.util.Range<Integer> bitrateRange;
+    private int currentVideoBitrate;
+    private long lastBudgetCheckUs = Long.MIN_VALUE;
+
+    private void fitSizeBudget(long presentationTimeUs) {
+        long budget = writer.getSizeBudgetBytes();
+        if (budget <= 0) return;
+        if (lastBudgetCheckUs != Long.MIN_VALUE && presentationTimeUs - lastBudgetCheckUs < BUDGET_CHECK_US) return;
+        lastBudgetCheckUs = presentationTimeUs;
+        double remainingS = Math.max(1.0, (BUDGET_MAX_DURATION_US - writer.getVideoTimelineUs()) / 1_000_000.0);
+        double reserveBytes = (BUDGET_FLOOR_BPS * BUDGET_OVERSHOOT + AUDIO_BIT_RATE) * remainingS / 8.0;
+        double excessBytes = budget - writer.getWrittenBytes() - reserveBytes;
+        double windowS = Math.min(remainingS, BUDGET_LOOKAHEAD_S);
+        long target = (long) (BUDGET_FLOOR_BPS + excessBytes * 8.0 / windowS);
+        target = Math.max(BUDGET_MIN_BPS, Math.min(videoBitrate, target));
+        if (bitrateRange != null) target = bitrateRange.clamp((int) target);
+        if (Math.abs(target - currentVideoBitrate) < Math.max(50_000L, currentVideoBitrate / 20)) return;
+        try {
+            android.os.Bundle params = new android.os.Bundle();
+            params.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, (int) target);
+            videoCodec.setParameters(params);
+            String message = "size budget: bitrate " + currentVideoBitrate + " -> " + target
+                    + ", written=" + writer.getWrittenBytes() + "/" + budget
+                    + ", remainingS=" + Math.round(remainingS);
+            diagnostics.log(message);
+            android.util.Log.i("BublikRound", message);
+            currentVideoBitrate = (int) target;
+        } catch (RuntimeException e) {
+            diagnostics.error("size budget: setParameters failed", e);
         }
     }
 

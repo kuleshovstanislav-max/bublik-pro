@@ -4,4 +4,5 @@
     <string name="BublikAllChats">Усі чати</string>
     <string name="BublikStories">Сторіс</string>
     <string name="BublikGooglePhotos">Фото</string>
+    <string name="BublikRoundBitrateAuto">Авто (до 2 Мбіт/с)</string>
 </resources>

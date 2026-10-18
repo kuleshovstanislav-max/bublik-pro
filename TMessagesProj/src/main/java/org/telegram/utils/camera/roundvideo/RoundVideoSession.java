@@ -227,6 +227,7 @@ public final class RoundVideoSession {
         private CameraResolution cameraResolution;
         private FrameRate frameRate;
         private int videoBitrate;
+        private long sizeBudgetBytes;
         private long maximumDurationMs = DEFAULT_MAXIMUM_DURATION_MS;
         private boolean compositionEnabled = true;
         private Listener listener;
@@ -254,6 +255,15 @@ public final class RoundVideoSession {
         /** Sets the required AVC bitrate in bits per second. */
         public @NonNull Builder setVideoBitrate(int bitrate) {
             videoBitrate = bitrate;
+            return this;
+        }
+
+        /**
+         * Bublik Pro: keeps the whole file under this many bytes by lowering the bitrate while
+         * recording (0 turns it off). Telegram's server turns bigger rounds into plain videos.
+         */
+        public @NonNull Builder setSizeBudgetBytes(long bytes) {
+            sizeBudgetBytes = bytes;
             return this;
         }
 
@@ -524,6 +534,7 @@ public final class RoundVideoSession {
     private final RoundVideoDiagnostics diagnostics;
     private final OutputResolution outputResolution;
     private final int videoBitrate;
+    private final long sizeBudgetBytes;
     private final CameraResolution requestedCameraResolution;
     private final FrameRate requestedFrameRate;
     private final boolean compositionEnabled;
@@ -593,6 +604,7 @@ public final class RoundVideoSession {
         requestedFacing = builder.initialFacing;
         outputResolution = builder.outputResolution;
         videoBitrate = builder.videoBitrate;
+        sizeBudgetBytes = builder.sizeBudgetBytes;
         requestedCameraResolution = builder.cameraResolution;
         requestedFrameRate = builder.frameRate;
         maximumDurationMs = builder.maximumDurationMs;
@@ -605,6 +617,7 @@ public final class RoundVideoSession {
                 + ", sdk=" + Build.VERSION.SDK_INT
                 + ", output=" + outputResolution.getSize() + "x" + outputResolution.getSize()
                 + ", bitrate=" + videoBitrate
+                + ", sizeBudget=" + sizeBudgetBytes
                 + ", cameraMode=" + requestedCameraResolution
                 + ", fps=" + requestedFrameRate.getValue()
                 + ", composition=" + compositionEnabled
@@ -1314,6 +1327,7 @@ public final class RoundVideoSession {
                         }
                     }
             );
+            writer.setSizeBudgetBytes(sizeBudgetBytes);
             diagnostics.log("output generation started: id=" + generation.id
                     + ", includeAudio=" + includeAudio
                     + ", file=" + file.getName());

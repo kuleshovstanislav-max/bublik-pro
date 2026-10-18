@@ -44,13 +44,11 @@ public class RoundVideoSettingsActivity extends BaseFragment {
     private static final int ROW_COUNT = 10; // Bublik Pro: styling toggle visible in every build
 
     private static final int[] BITRATES = {
-            750_000,
-            1_000_000,
-            1_200_000,
-            2_000_000,
-            3_000_000,
+            SharedSettings.ROUND_VIDEO_BITRATE_AUTO,
+            6_000_000,
             4_000_000,
-            6_000_000
+            2_000_000,
+            1_200_000
     };
 
     private static final RoundVideoSession.OutputResolution[] OUTPUT_RESOLUTIONS = {
@@ -165,6 +163,9 @@ public class RoundVideoSettingsActivity extends BaseFragment {
     }
 
     private static String formatBitrate(int bitrate) {
+        if (bitrate == SharedSettings.ROUND_VIDEO_BITRATE_AUTO) {
+            return org.telegram.messenger.ApplicationLoader.applicationContext.getString(R.string.BublikRoundBitrateAuto);
+        }
         if (bitrate % 1_000_000 == 0) {
             return (bitrate / 1_000_000) + " Mbps";
         }
