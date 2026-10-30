@@ -65,6 +65,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BublikPush;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.AuthTokensHelper;
 import org.telegram.messenger.BirthdayController;
@@ -85,6 +87,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SharedPrefsHelper;
 import org.telegram.ui.Cells.TextCell;
+import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Wallet.GramWallet;
 import org.telegram.ui.Wallet.WalletActivity;
 import org.telegram.utils.settings.SharedSettings;
@@ -427,6 +430,8 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         avatarDrawable = new AvatarDrawable();
         avatarView = new BackupImageView(context);
         avatarView.setRoundRadius(dp(90));
+        avatarView.getImageReceiver().bublikCookie = true; // Bublik Pro
+        avatarDrawable.bublikCookie = true;
         avatarContainer.addView(avatarView, LayoutHelper.createFrame(90, 90, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 15, 0, 0));
 
         avatarProgressView = new RadialProgressView(context) {
@@ -767,6 +772,9 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             items.add(UItem.asShadow(null));
             items.add(UItem.asHeader("Experimental"));
             items.add(SettingCell.Factory.of(24, 0xFFF45255, 0xFFDF3955, 0, getString(R.string.RoundVideoSettings)));
+            if (!TextUtils.isEmpty(BuildConfig.BUBLIK_PUSH_RELAY)) {
+                items.add(UItem.asCheck(27, getString(R.string.BublikPush)).setChecked(SharedSettings.bublikPushEnabled.get()));
+            }
             items.add(SettingCell.Factory.of(26, 0xFF55CA47, 0xFF27B434, 0, getString(R.string.AudioRecorderSettings)));
         }
 
@@ -915,6 +923,15 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 presentFragment(new RoundVideoSettingsActivity());
                 break;
             }
+            case 27: {
+                // Bublik Pro: notifications through the Web Push relay.
+                final boolean enabled = !SharedSettings.bublikPushEnabled.get();
+                BublikPush.setEnabled(enabled);
+                if (view instanceof TextCheckCell) {
+                    ((TextCheckCell) view).setChecked(enabled);
+                }
+                break;
+            }
             case 26: {
                 presentFragment(new AudioRecorderSettingsActivity());
                 break;
@@ -1021,6 +1038,8 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             avatarDrawable = new AvatarDrawable();
             avatarView = new BackupImageView(context);
             avatarView.setRoundRadius(dp(14));
+            avatarView.getImageReceiver().bublikCookie = true; // Bublik Pro
+            avatarDrawable.bublikCookie = true;
 
             textView = new SimpleTextView(context);
             textView.setTextSize(15);
@@ -1243,7 +1262,15 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             titleView.setTranslationX(icon == 0 ? dp(2) : 0);
             subtitleView.setTranslationX(icon == 0 ? dp(2) : 0);
 
-            iconBackground.setColor(iconColorTop, iconColorBottom);
+            // Bublik Pro: no colored tiles; the Phosphor Duotone glyph is tinted with the accent instead.
+            if (hasBackground) {
+                hasBackground = false;
+                iconBackground.setColor(0, 0);
+                iconView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_unreadCounter, resourcesProvider), PorterDuff.Mode.SRC_IN));
+            } else {
+                iconBackground.setColor(iconColorTop, iconColorBottom);
+                iconView.clearColorFilter();
+            }
             iconView.setImageResource(icon);
             titleView.setText(title);
             subtitleView.setVisibility((twoLines = !TextUtils.isEmpty(subtitle)) ? View.VISIBLE : View.GONE);

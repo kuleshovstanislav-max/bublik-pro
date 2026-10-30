@@ -6,4 +6,5 @@
     <string name="BublikStories">Stories</string>
     <string name="BublikGooglePhotos">Photos</string>
     <string name="BublikRoundBitrateAuto">Auto (up to 2 Mbps)</string>
+    <string name="BublikPush">Push notifications via Bublik</string>
 </resources>

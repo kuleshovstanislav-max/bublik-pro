@@ -87,6 +87,24 @@ OVERRIDES = {
     "msg2_policy": ("shield-check", "duotone", 24, 24),
     "msg2_devices": ("devices", "duotone", 24, 24),
     "msg2_language": ("translate", "duotone", 24, 24),
+    # Settings screen (SettingsActivity); shown without the colored tile, tinted with the accent.
+    "settings_account": ("user-circle", "duotone", 24, 24),
+    "settings_chat": ("chat-circle-text", "duotone", 24, 24),
+    "settings_privacy": ("lock", "duotone", 24, 24),
+    "settings_sounds": ("bell", "duotone", 24, 24),
+    "settings_data": ("database", "duotone", 24, 24),
+    "settings_folders": ("folder", "duotone", 24, 24),
+    "settings_devices": ("devices", "duotone", 24, 24),
+    "settings_power": ("battery-charging", "duotone", 24, 24),
+    "settings_language": ("translate", "duotone", 24, 24),
+    "settings_ask": ("chat-circle-dots", "duotone", 24, 24),
+    "settings_faq": ("question", "duotone", 24, 24),
+    "settings_features": ("lightbulb", "duotone", 24, 24),
+    "settings_policy": ("shield-check", "duotone", 24, 24),
+    "settings_business": ("storefront", "duotone", 24, 24),
+    "settings_gift": ("gift", "duotone", 24, 24),
+    "settings_premium": ("star", "duotone", 24, 24),
+    "settings_stars": ("star-four", "duotone", 24, 24),
 }
 
 HEADER = """<?xml version="1.0" encoding="utf-8"?>

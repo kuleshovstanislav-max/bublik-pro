@@ -16198,6 +16198,14 @@ public class MessagesController extends BaseController implements NotificationCe
         TL_account.registerDevice req = new TL_account.registerDevice();
         req.token_type = pushType;
         req.token = regid;
+        if (pushType == PushListenerController.PUSH_TYPE_FIREBASE && BublikPush.isActive()) {
+            // Bublik Pro: Telegram can't reach our FCM project, so register a Web Push endpoint on our relay.
+            final String webPushToken = BublikPush.webPushToken(regid);
+            if (webPushToken != null) {
+                req.token_type = BublikPush.TOKEN_TYPE_WEB_PUSH;
+                req.token = webPushToken;
+            }
+        }
         req.no_muted = false;
         req.secret = SharedConfig.pushAuthKey;
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {

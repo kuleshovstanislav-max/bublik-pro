@@ -36,6 +36,10 @@ public final class SharedSettings {
     public static final IntSetting roundVideoVideoBitrate =
         IntSetting.of("round_video_bitrate_v2", ROUND_VIDEO_BITRATE_AUTO);
 
+    // Bublik Pro: notifications through our Web Push relay and FCM project (on by default).
+    public static final BooleanSetting bublikPushEnabled =
+        BooleanSetting.of("bublik_push_enabled", true);
+
     public static final BooleanSetting roundVideoComposition =
         BooleanSetting.of("round_video_composition", false);
 

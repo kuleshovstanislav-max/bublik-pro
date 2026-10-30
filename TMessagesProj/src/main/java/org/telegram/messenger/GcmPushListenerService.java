@@ -27,6 +27,10 @@ public class GcmPushListenerService extends FirebaseMessagingService {
             FileLog.d("FCM received data: " + data + " from: " + from);
         }
 
+        if (BublikPush.isRelayMessage(data)) {
+            BublikPush.onWake();
+            return;
+        }
         PushListenerController.processRemoteMessage(PushListenerController.PUSH_TYPE_FIREBASE, data.get("p"), time);
     }
 

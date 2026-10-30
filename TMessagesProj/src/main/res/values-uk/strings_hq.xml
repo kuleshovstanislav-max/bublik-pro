@@ -5,4 +5,5 @@
     <string name="BublikStories">Сторіс</string>
     <string name="BublikGooglePhotos">Фото</string>
     <string name="BublikRoundBitrateAuto">Авто (до 2 Мбіт/с)</string>
+    <string name="BublikPush">Push-сповіщення через Bublik</string>
 </resources>
