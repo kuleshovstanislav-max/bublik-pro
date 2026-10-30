@@ -112,9 +112,9 @@ Verify the signing certificate fingerprint published in the release notes.
 
 ## Changed files
 
-- `utils/camera/roundvideo/RoundVideoSession.java`: 640p output size
-- `utils/camera/roundvideo/RoundVideoCameraController.java`: source crop for HQ sizes
-- `utils/camera/roundvideo/RoundVideoCodecRecorder.java`: High profile and level, VBR, bitrate clamping, fallback
+- `utils/recorder/round/RoundVideoSession.java`: 640p output size
+- `utils/recorder/round/RoundVideoCameraController.java`: source crop for HQ sizes
+- `utils/recorder/round/RoundVideoCodecRecorder.java`: High profile and level, VBR, bitrate clamping, fallback
 - `ui/RoundVideoSettingsActivity.java`: new choices incl. Auto (and a fix for a `null` bitrate label in release builds)
 - `RoundVideoCodecRecorder.java` / `RoundVideoMp4Writer.java`: Auto bitrate that keeps the file under Telegram's round size limit
 - `utils/settings/SharedSettings.java`: HQ defaults, Round Video settings visible in release
