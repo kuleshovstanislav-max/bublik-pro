@@ -1,9 +1,8 @@
 package org.telegram.ui.Components;
 
+import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.RectF;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 /** Bublik Pro: the 9-wave "cookie" avatar shape from Android 17's Pixel apps. */
 public final class BublikShapes {
@@ -11,11 +10,19 @@ public final class BublikShapes {
     private static final float DEPTH = 0.07f;
     private static final int STEPS = 144;
 
-    private static final ConcurrentHashMap<Long, Path> cache = new ConcurrentHashMap<>();
+    // Built once in a 1x1 box and scaled per call: avatar sizes change every frame while animating,
+    // so caching a path per size would grow without bound.
+    private static final Path UNIT = build(1f, 1f);
     private static final ThreadLocal<Path> work = new ThreadLocal<Path>() {
         @Override
         protected Path initialValue() {
             return new Path();
+        }
+    };
+    private static final ThreadLocal<Matrix> matrix = new ThreadLocal<Matrix>() {
+        @Override
+        protected Matrix initialValue() {
+            return new Matrix();
         }
     };
 
@@ -24,17 +31,11 @@ public final class BublikShapes {
 
     /** Cookie outline filling {@code rect}. The returned path is reused per thread; don't keep it. */
     public static Path cookie(RectF rect) {
-        final int w = Math.round(rect.width());
-        final int h = Math.round(rect.height());
-        final long key = ((long) w << 32) | (h & 0xffffffffL);
-        Path base = cache.get(key);
-        if (base == null) {
-            base = build(w, h);
-            cache.put(key, base);
-        }
+        final Matrix m = matrix.get();
+        m.setScale(rect.width(), rect.height());
+        m.postTranslate(rect.left, rect.top);
         final Path path = work.get();
-        path.set(base);
-        path.offset(rect.left, rect.top);
+        UNIT.transform(m, path);
         return path;
     }
 
