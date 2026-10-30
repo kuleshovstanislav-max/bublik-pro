@@ -3280,11 +3280,12 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
         }
     }
 
+    // Bublik Pro: card radius 24 everywhere, matching the chat list cards.
     public void setSections() {
-        setSections(dp(12), dp(16), false);
+        setSections(dp(12), dp(24), false);
     }
     public void setSections(boolean topPadding) {
-        setSections(dp(12), dp(16), topPadding);
+        setSections(dp(12), dp(24), topPadding);
     }
     public void setSections(int padding, float roundRadius, boolean topPadding) {
         setSections(

@@ -900,6 +900,13 @@ public final class RoundVideoSession {
 
     private static final long ROUND_SIZE_WARNING_BYTES = 12_400_000L;
 
+    /** Bublik Pro: share of the Auto bitrate size budget written so far, or -1 when Auto is off. */
+    public float getSizeBudgetFraction() {
+        RoundVideoMp4Writer current = writer;
+        if (sizeBudgetBytes <= 0 || current == null) return -1f;
+        return Math.min(1f, current.getWrittenBytes() / (float) sizeBudgetBytes);
+    }
+
     /** Returns the current recording duration, including the active segment. */
     @MainThread
     public long getRecordedDurationMs() {

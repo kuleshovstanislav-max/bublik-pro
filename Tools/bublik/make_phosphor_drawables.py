@@ -74,6 +74,19 @@ OVERRIDES = {
     "chat_calls_video": ("video-camera", "duotone", 28, 24),
     "chat_calls_outgoing": ("arrow-up-right", "bold", 14, 14),
     "chat_calls_incoming": ("arrow-down-left", "bold", 14, 14),
+    # Settings list (ProfileActivity); tinted with the accent there.
+    "msg2_notifications": ("bell", "duotone", 24, 24),
+    "msg2_secret": ("lock", "duotone", 24, 24),
+    "msg2_data": ("database", "duotone", 24, 24),
+    "msg2_discussion": ("chat-circle-text", "duotone", 24, 24),
+    "msg2_folder": ("folder", "duotone", 24, 24),
+    "msg2_sticker": ("sticker", "duotone", 24, 24),
+    "msg2_battery": ("battery-charging", "duotone", 24, 24),
+    "msg2_ask_question": ("chat-circle-dots", "duotone", 24, 24),
+    "msg2_help": ("question", "duotone", 24, 24),
+    "msg2_policy": ("shield-check", "duotone", 24, 24),
+    "msg2_devices": ("devices", "duotone", 24, 24),
+    "msg2_language": ("translate", "duotone", 24, 24),
 }
 
 HEADER = """<?xml version="1.0" encoding="utf-8"?>

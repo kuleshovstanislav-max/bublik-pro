@@ -6463,6 +6463,19 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
         openWithFrontFaceCamera = value;
     }
 
+    /** Bublik Pro: copy progress (0..1, -1 = done) on the Photos (Google Photos) tab. */
+    public void setBublikPhotosProgress(float progress) {
+        if (buttonsRecyclerView == null) {
+            return;
+        }
+        for (int i = 0; i < buttonsRecyclerView.getChildCount(); i++) {
+            final View child = buttonsRecyclerView.getChildAt(i);
+            if (child instanceof AttachButton && Integer.valueOf(ChatAttachAlertPhotoLayout.BUBLIK_GOOGLE_PHOTOS).equals(child.getTag())) {
+                ((AttachButton) child).glassTabView.setBublikProgress(progress);
+            }
+        }
+    }
+
     public ChatAttachAlertPhotoLayout getPhotoLayout() {
         return photoLayout;
     }

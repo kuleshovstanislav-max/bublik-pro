@@ -1049,10 +1049,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
         }
 
+        // Bublik Pro: cookie shape while the avatar is small; expanding falls back to Telegram's round rect.
+        public boolean bublikCookie;
+
         @Override
         public void setRoundRadius(int value) {
             super.setRoundRadius(value);
             foregroundImageReceiver.setRoundRadius(value);
+            final boolean cookie = bublikCookie && value >= AndroidUtilities.dp(50);
+            getImageReceiver().bublikCookie = cookie;
+            foregroundImageReceiver.bublikCookie = cookie;
         }
 
         @Override
@@ -5381,6 +5387,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         };
         avatarImage.createBlurEffect(getActionsExtraHeight());
         avatarImage.getImageReceiver().setAllowDecodeSingleFrame(true);
+        avatarImage.bublikCookie = true;
+        if (avatarDrawable != null) {
+            avatarDrawable.bublikCookie = getSmallAvatarRoundRadius() >= dp(50);
+        }
         avatarImage.setRoundRadiusForExpand(getSmallAvatarRoundRadius());
         avatarImage.setPivotX(0);
         avatarImage.setPivotY(0);
@@ -13956,6 +13966,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         textCell.setTextAndCheckAndColorfulIcon(LocaleController.getString(R.string.BotProfilePermissionBiometry), botBiometry != null && botBiometry.granted(), R.drawable.filled_access_fingerprint, getThemedColor(Theme.key_color_orange), false);
                     } else if (position == botPermissionEmojiStatus) {
                         textCell.setTextAndCheckAndColorfulIcon(LocaleController.getString(R.string.BotProfilePermissionEmojiStatus), userInfo != null && userInfo.bot_can_manage_emoji_status, R.drawable.filled_access_sleeping, getThemedColor(Theme.key_color_lightblue), botPermissionLocation != -1 || botPermissionBiometry != -1);
+                    }
+                    if (position == notificationRow || position == privacyRow || position == dataRow || position == chatRow
+                            || position == filtersRow || position == stickersRow || position == liteModeRow || position == devicesRow
+                            || position == languageRow || position == questionRow || position == faqRow || position == policyRow) {
+                        // Bublik Pro: settings icons are Phosphor Duotone in the accent color.
+                        textCell.setColors(Theme.key_chats_unreadCounter, Theme.key_windowBackgroundWhiteBlackText);
                     }
                     textCell.valueTextView.setTextColor(dontApplyPeerColor(getThemedColor(Theme.key_windowBackgroundWhiteValueText), false));
                     break;

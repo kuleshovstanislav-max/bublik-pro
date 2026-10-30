@@ -6554,8 +6554,13 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         return copyFileToCache(uri, ext, -1);
     }
 
-    @SuppressLint("DiscouragedPrivateApi")
     public static String copyFileToCache(Uri uri, String ext, long sizeLimit) {
+        return copyFileToCache(uri, ext, sizeLimit, null);
+    }
+
+    /** Bublik Pro: {@code onBytes} gets the number of bytes copied so far (Google Photos progress). */
+    @SuppressLint("DiscouragedPrivateApi")
+    public static String copyFileToCache(Uri uri, String ext, long sizeLimit, Utilities.Callback<Long> onBytes) {
         InputStream inputStream = null;
         FileOutputStream output = null;
         int totalLen = 0;
@@ -6606,6 +6611,9 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             while ((len = inputStream.read(buffer)) != -1) {
                 output.write(buffer, 0, len);
                 totalLen += len;
+                if (onBytes != null) {
+                    onBytes.run((long) totalLen);
+                }
                 if (sizeLimit > 0 && totalLen > sizeLimit) {
                     return null;
                 }

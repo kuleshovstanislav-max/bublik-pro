@@ -7,7 +7,10 @@ import static org.telegram.messenger.AndroidUtilities.lerp;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PathMeasure;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
@@ -25,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RawRes;
 import androidx.annotation.StringRes;
 import androidx.core.graphics.ColorUtils;
+import androidx.core.graphics.PathParser;
 import androidx.core.math.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -220,6 +224,77 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         if (saveLayer) {
             canvas.restore();
         }
+
+        if (bublikProgress >= 0) {
+            drawBublikProgress(canvas);
+        }
+    }
+
+    // Bublik Pro: copy progress traced along the Phosphor cloud silhouette (Google Photos tab), -1 = off.
+    private static final String BUBLIK_CLOUD_SILHOUETTE = "M240 128a80 80 0 0 1-80 80H72A56 56 0 1 1 85.92 97.74v.1A80 80 0 0 1 240 128";
+    private float bublikProgress = -1f;
+    private CharSequence bublikSavedText;
+    private Path bublikCloud;
+    private final Path bublikCloudScaled = new Path();
+    private final Path bublikCloudSegment = new Path();
+    private final PathMeasure bublikCloudMeasure = new PathMeasure();
+    private final Matrix bublikCloudMatrix = new Matrix();
+    private final RectF bublikIconRect = new RectF();
+    private Paint bublikTracePaint;
+
+    /** Shows copy progress (0..1) on this tab: the cloud outline fills with the accent and the label shows "NN%". */
+    public void setBublikProgress(float progress) {
+        if (progress < 0) {
+            if (bublikProgress >= 0) {
+                textView.setText(bublikSavedText);
+                textView.setContentDescription(null);
+            }
+            bublikProgress = -1f;
+            invalidate();
+            return;
+        }
+        if (bublikProgress < 0) {
+            bublikSavedText = textView.getText();
+        }
+        progress = MathUtils.clamp(progress, 0f, 1f);
+        final int percent = Math.round(progress * 100);
+        if (bublikProgress < 0 || percent != Math.round(bublikProgress * 100)) {
+            textView.setText(percent + "%");
+            textView.setContentDescription(bublikSavedText + ", " + percent + "%");
+        }
+        bublikProgress = progress;
+        invalidate();
+    }
+
+    private void drawBublikProgress(Canvas canvas) {
+        final Drawable icon = imageView.getDrawable();
+        if (icon == null || icon.getIntrinsicWidth() <= 0) {
+            return;
+        }
+        if (bublikCloud == null) {
+            bublikCloud = PathParser.createPathFromPathData(BUBLIK_CLOUD_SILHOUETTE);
+            bublikTracePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            bublikTracePaint.setStyle(Paint.Style.STROKE);
+            bublikTracePaint.setStrokeCap(Paint.Cap.ROUND);
+            bublikTracePaint.setStrokeJoin(Paint.Join.ROUND);
+        }
+        bublikIconRect.set(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
+        imageView.getImageMatrix().mapRect(bublikIconRect);
+        bublikIconRect.offset(imageView.getPaddingLeft(), imageView.getPaddingTop());
+        final float scale = bublikIconRect.width() / 256f;
+        bublikCloudMatrix.setScale(scale, scale);
+        bublikCloudMatrix.postTranslate(bublikIconRect.left, bublikIconRect.top);
+        bublikCloud.transform(bublikCloudMatrix, bublikCloudScaled);
+        bublikCloudMeasure.setPath(bublikCloudScaled, true);
+        bublikCloudSegment.rewind();
+        bublikCloudMeasure.getSegment(0, bublikCloudMeasure.getLength() * bublikProgress, bublikCloudSegment, true);
+        bublikTracePaint.setStrokeWidth(18 * scale);
+        bublikTracePaint.setColor(Theme.getColor(Theme.key_chats_unreadCounter));
+        canvas.save();
+        canvas.translate(imageView.getX(), imageView.getY());
+        canvas.scale(imageView.getScaleX(), imageView.getScaleY(), imageView.getPivotX(), imageView.getPivotY());
+        canvas.drawPath(bublikCloudSegment, bublikTracePaint);
+        canvas.restore();
     }
 
     private Drawable premiumStarDrawable;

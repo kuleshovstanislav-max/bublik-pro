@@ -180,6 +180,8 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
             }
         };
         avatarImageView.setRoundRadius(dp(24));
+        avatarImageView.getImageReceiver().bublikCookie = true;
+        avatarDrawable.bublikCookie = true;
         addView(avatarImageView, LayoutHelper.createFrame(46, 46, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, LocaleController.isRTL ? 0 : 7 + padding, 6, LocaleController.isRTL ? 7 + padding : 0, 0));
         setClipChildren(false);
 
@@ -739,6 +741,10 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
 
         avatarImageView.setRoundRadius(isCommunity ? dp(46 * 20 / 72f) :
                 (currentChat != null && currentChat.forum ? dp(14) : dp(24)));
+        // Bublik Pro: cookie avatars in contacts and member lists (forums and communities keep their squircle).
+        final boolean bublikCookie = !isCommunity && !(currentChat != null && currentChat.forum);
+        avatarImageView.getImageReceiver().bublikCookie = bublikCookie;
+        avatarDrawable.bublikCookie = bublikCookie;
 
         nameTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
     }

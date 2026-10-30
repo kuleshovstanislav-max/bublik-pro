@@ -376,6 +376,7 @@ public final class InstantCameraView2 extends InstantCameraViewBase {
         stopNotificationSent = false;
         lastVisibleDurationMs = 0L;
         progressView.setProgress(0f);
+        progressView.setBudgetProgress(-1f);
         showInitialPlaceholder();
         upload = new TelegramRoundVideoUpload(currentAccount, secretChat);
         activeOutputResolution = SharedSettings.roundVideoOutputResolution.get();
@@ -654,6 +655,7 @@ public final class InstantCameraView2 extends InstantCameraViewBase {
         );
         lastVisibleDurationMs = duration;
         progressView.setProgress(duration / (float) info.getMaximumDurationMs());
+        progressView.setBudgetProgress(session != null ? session.getSizeBudgetFraction() : -1f);
         dispatchRecordingUiFrame(duration);
     }
 

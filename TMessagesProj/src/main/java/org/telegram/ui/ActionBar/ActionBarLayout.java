@@ -1816,6 +1816,16 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         containerViewBack.setVisibility(View.INVISIBLE);
     }
 
+    /** Bublik Pro: the screen underneath a transition, {@code depth} 0 = normal, 1 = 92 % and dimmed. */
+    private static void setBublikDepth(View view, float depth) {
+        final float d = MathUtils.clamp(depth, 0f, 1f);
+        view.setPivotX(view.getMeasuredWidth() / 2f);
+        view.setPivotY(view.getMeasuredHeight() / 2f);
+        view.setScaleX(1f - 0.08f * d);
+        view.setScaleY(1f - 0.08f * d);
+        view.setAlpha(1f - 0.45f * d);
+    }
+
     private void startLayoutAnimation(final boolean open, final boolean first, final boolean preview) {
         if (first) {
             animationProgress = 0.0f;
@@ -1839,7 +1849,8 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                     dt = 18;
                 }
                 lastFrameTime = newTime;
-                float duration = preview && open ? 190.0f : 150.0f;
+                // Bublik Pro: the depth transition slides the whole width, so it runs longer than Telegram's 150 ms fade.
+                float duration = preview ? (open ? 190.0f : 150.0f) : 320.0f;
                 animationProgress += dt / duration;
                 if (animationProgress > 1.0f) {
                     animationProgress = 1.0f;
@@ -1882,7 +1893,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                         interpolated = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(animationProgress);
                     }
                 } else {
-                    interpolated = decelerateInterpolator.getInterpolation(animationProgress);
+                    interpolated = CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(animationProgress);
                 }
                 if (open) {
                     float clampedInterpolated = MathUtils.clamp(interpolated, 0, 1);
@@ -1901,7 +1912,10 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                         containerView.invalidate();
                         invalidate();
                     } else {
-                        containerView.setTranslationX(dp(48) * (1.0f - interpolated));
+                        // Bublik Pro "depth": the new screen slides in over the old one, which shrinks to 92 % and dims.
+                        containerView.setAlpha(1f);
+                        containerView.setTranslationX(containerView.getMeasuredWidth() * (1.0f - interpolated));
+                        setBublikDepth(containerViewBack, interpolated);
                     }
                 } else {
                     float clampedReverseInterpolated = MathUtils.clamp(1f - interpolated, 0, 1);
@@ -1916,7 +1930,9 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                         containerView.invalidate();
                         invalidate();
                     } else {
-                        containerViewBack.setTranslationX(dp(48) * interpolated);
+                        containerViewBack.setAlpha(1f);
+                        containerViewBack.setTranslationX(containerViewBack.getMeasuredWidth() * interpolated);
+                        setBublikDepth(containerView, 1f - interpolated);
                     }
                 }
                 if (animationProgress < 1) {

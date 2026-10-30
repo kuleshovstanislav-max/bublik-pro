@@ -17,9 +17,13 @@ public final class RoundVideoProgressView extends FrameLayout {
         public void setAlpha(int alpha) {
             super.setAlpha(alpha);
             backgroundPaint.setAlpha(Math.round(alpha * 0.20f));
+            budgetPaint.setAlpha(alpha);
             invalidate();
         }
     };
+    // Bublik Pro: thin accent ring outside the time ring: how much of the Auto size budget is used.
+    private final Paint budgetPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private float budgetProgress = -1f;
     private final RectF arcBounds = new RectF();
     private final float strokeWidth;
     private final float ringInset;
@@ -33,6 +37,9 @@ public final class RoundVideoProgressView extends FrameLayout {
         ringInset = AndroidUtilities.dp(5) + strokeWidth * 0.5f;
         configureStroke(backgroundPaint, 0.20f);
         configureStroke(progressPaint, 1f);
+        configureStroke(budgetPaint, 1f);
+        budgetPaint.setStrokeWidth(AndroidUtilities.dp(2));
+        budgetPaint.setColor(0xFF2E9BF0);
         setWillNotDraw(false);
     }
 
@@ -49,6 +56,14 @@ public final class RoundVideoProgressView extends FrameLayout {
         invalidate();
     }
 
+    /** Bublik Pro: share of the Auto bitrate size budget written so far, -1 hides the ring. */
+    public void setBudgetProgress(float progress) {
+        float value = progress < 0 ? -1f : clamp(progress, 0f, 1f);
+        if (budgetProgress == value) return;
+        budgetProgress = value;
+        invalidate();
+    }
+
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
@@ -60,6 +75,11 @@ public final class RoundVideoProgressView extends FrameLayout {
         );
         canvas.drawOval(arcBounds, backgroundPaint);
         canvas.drawArc(arcBounds, -90f, progress * 360f, false, progressPaint);
+        if (budgetProgress > 0) {
+            final float inset = AndroidUtilities.dp(1) + budgetPaint.getStrokeWidth() * 0.5f;
+            arcBounds.set(inset, inset, getWidth() - inset, getHeight() - inset);
+            canvas.drawArc(arcBounds, -90f, budgetProgress * 360f, false, budgetPaint);
+        }
     }
 
     private static void configureStroke(Paint paint, float alpha) {

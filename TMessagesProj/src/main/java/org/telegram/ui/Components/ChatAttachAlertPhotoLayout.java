@@ -2780,8 +2780,23 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
             return;
         }
         final android.content.ContentResolver resolver = ApplicationLoader.applicationContext.getContentResolver();
+        parentAlert.setBublikPhotosProgress(0f);
         Utilities.globalQueue.postRunnable(() -> {
             final ArrayList<MediaController.PhotoEntry> entries = new ArrayList<>();
+            // Cloud items are downloaded while we copy them, so report progress over the total size.
+            long totalBytes = 0;
+            for (Uri uri : uris) {
+                try (android.database.Cursor cursor = resolver.query(uri, new String[]{android.provider.OpenableColumns.SIZE}, null, null, null)) {
+                    if (cursor != null && cursor.moveToFirst() && !cursor.isNull(0)) {
+                        totalBytes += Math.max(0, cursor.getLong(0));
+                    }
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+            }
+            final long total = totalBytes;
+            final long[] copiedBefore = {0};
+            final int[] lastPercent = {-1};
             for (Uri uri : uris) {
                 try {
                     final String mime = resolver.getType(uri);
@@ -2790,10 +2805,20 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     if (ext == null) {
                         ext = video ? "mp4" : "jpg";
                     }
-                    final String path = MediaController.copyFileToCache(uri, ext);
+                    final String path = MediaController.copyFileToCache(uri, ext, -1, bytes -> {
+                        if (total <= 0) {
+                            return;
+                        }
+                        final int percent = (int) Math.min(100, (copiedBefore[0] + bytes) * 100 / total);
+                        if (percent != lastPercent[0]) {
+                            lastPercent[0] = percent;
+                            AndroidUtilities.runOnUIThread(() -> parentAlert.setBublikPhotosProgress(percent / 100f));
+                        }
+                    });
                     if (path == null) {
                         continue;
                     }
+                    copiedBefore[0] += new File(path).length();
                     int width = 0, height = 0;
                     MediaController.PhotoEntry entry;
                     if (video) {
@@ -2838,6 +2863,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 }
             }
             AndroidUtilities.runOnUIThread(() -> {
+                parentAlert.setBublikPhotosProgress(-1f);
                 if (parentAlert.destroyed || entries.isEmpty()) {
                     return;
                 }
